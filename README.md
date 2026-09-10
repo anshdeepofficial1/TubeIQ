@@ -1,58 +1,82 @@
-# TubeIQ
-<p align="center">
-  <a href="https://github.com/sponsors/anshdeepofficial"><img src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub" height="40" /></a>
-  <a href="https://buymeacoffee.com/anshdeepofficial"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="40" /></a>
-</p>
+<div align="center">
 
-TubeIQ is a website that helps you understand YouTube channel performance in a clear, visual way.
+# 📈 TubeIQ
 
-It is designed for creators and teams who want quick answers, such as:
-- What content is performing best?
-- How consistent is channel growth?
-- What should we improve next?
+**A visual YouTube analytics experience for channel insights, content patterns, and AI-assisted recommendations.**
 
-## What TubeIQ does
+![YouTube](https://img.shields.io/badge/YouTube-Analytics-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?style=for-the-badge&logo=javascript&logoColor=000)
+![AI](https://img.shields.io/badge/AI-Assisted%20Insights-7C3AED?style=for-the-badge)
+![Stars](https://img.shields.io/github/stars/anshdeepofficial/TubeIQ?style=for-the-badge&logo=github)
 
-- Analyzes public YouTube channel data
-- Shows key metrics in a dashboard
-- Highlights engagement and content patterns
-- Provides AI-assisted recommendations for future videos
+<a href="https://github.com/sponsors/anshdeepofficial"><img src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub" /></a>
+<a href="https://buymeacoffee.com/anshdeepofficial"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000" alt="Buy Me a Coffee" /></a>
 
-## Who this is for
+</div>
+
+---
+
+## ✨ Overview
+
+TubeIQ helps creators and small media teams understand YouTube channel performance without navigating a complex analytics workflow. It turns public channel data into a focused dashboard and surfaces patterns that can guide future content decisions.
+
+## 🚀 What TubeIQ Does
+
+- Analyze public YouTube channel data
+- Present key performance metrics visually
+- Highlight engagement and content patterns
+- Compare content performance at a glance
+- Provide AI-assisted recommendations for future videos
+- Support channel lookup by ID or handle
+- Offer optional Google sign-in for owner-oriented features
+
+## 🎯 Built For
 
 - YouTube creators
 - Small media teams
-- Growth and content managers
-- Anyone who wants channel insights without complex analytics tools
+- Content managers
+- Growth-focused creators
+- Anyone who wants a simpler channel-performance view
 
-## How to use it (simple)
+## 🛠️ Tech Stack
 
-1. Open the website (`index.html`) in your browser.
-2. Enter a YouTube channel ID or handle (example: `@MrBeast`).
-3. Click **Analyze** to view the dashboard.
-4. Optionally sign in with Google to access owner-specific features.
+| Area | Technology |
+| --- | --- |
+| Frontend | HTML, CSS, JavaScript |
+| Data | YouTube API integrations |
+| Intelligence | AI-assisted recommendation flow |
+| Deployment | Static web-compatible |
 
-## Project files
+## ⚡ Getting Started
+
+```bash
+git clone https://github.com/anshdeepofficial/TubeIQ.git
+cd TubeIQ
+```
+
+Open `index.html` in a modern browser, enter a YouTube channel ID or handle, and start an analysis.
+
+## 🔐 Configuration Note
+
+For production deployments, keep API credentials outside public client-side source code. Sensitive keys should be moved behind a server-side endpoint or secure secret-management layer.
+
+## 📁 Core Files
 
 ```text
 TubeIQ/
-├── index.html      # Main website (UI + logic)
-├── Logo.png        # Website logo
-├── privacy.html    # Privacy policy page
-├── terms.html      # Terms of service page
-└── README.md       # Project documentation
+├── index.html
+├── Logo.png
+├── privacy.html
+├── terms.html
+└── README.md
 ```
 
-## Important note on API keys
+## 🤝 Contributing
 
-TubeIQ currently keeps API configuration in `index.html`.
-For production use, keep real credentials out of public repositories and use secure secret management.
+Contributions are welcome. Keep analytics changes understandable, protect credentials, and test the complete analysis flow before opening a pull request.
 
-## Contributing
+---
 
-Contributions are welcome.
-Please keep updates focused, professional, and easy to review.
-
-## License
-
-Add your preferred license (for example, MIT) if you plan to distribute this project publicly.
+<div align="center">
+Built by <a href="https://github.com/anshdeepofficial">Anshdeep Singh</a>
+</div>
