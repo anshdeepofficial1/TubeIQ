@@ -7,7 +7,7 @@
 ![YouTube](https://img.shields.io/badge/YouTube-Analytics-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-Frontend-F7DF1E?style=for-the-badge&logo=javascript&logoColor=000)
 ![AI](https://img.shields.io/badge/AI-Assisted%20Insights-7C3AED?style=for-the-badge)
-![Stars](https://img.shields.io/github/stars/anshdeepofficial/TubeIQ?style=for-the-badge&logo=github)
+![Stars](https://img.shields.io/github/stars/anshdeepofficial1/TubeIQ?style=for-the-badge&logo=github)
 
 <a href="https://github.com/sponsors/anshdeepofficial"><img src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor on GitHub" /></a>
 <a href="https://buymeacoffee.com/anshdeepofficial"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=000" alt="Buy Me a Coffee" /></a>
@@ -50,7 +50,7 @@ TubeIQ helps creators and small media teams understand YouTube channel performan
 ## ⚡ Getting Started
 
 ```bash
-git clone https://github.com/anshdeepofficial/TubeIQ.git
+git clone https://github.com/anshdeepofficial1/TubeIQ.git
 cd TubeIQ
 ```
 
@@ -78,5 +78,5 @@ Contributions are welcome. Keep analytics changes understandable, protect creden
 ---
 
 <div align="center">
-Built by <a href="https://github.com/anshdeepofficial">Anshdeep Singh</a>
+Built by <a href="https://github.com/anshdeepofficial1">Anshdeep Singh</a>
 </div>
