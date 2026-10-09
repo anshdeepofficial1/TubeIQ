@@ -19,6 +19,7 @@
 <meta name="twitter:description" content="Analyze YouTube channels and unlock growth insights with TubeIQ.">
 <meta name="twitter:image" content="https://ytengine.vercel.app/Logo.png">
 <link rel="icon" type="image/png" href="Logo.png">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -529,6 +530,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
 </style>
+<link rel="stylesheet" href="premium.css">
 </head>
 <body>
 
@@ -540,7 +542,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
   </a>
   <div class="nav-right">
     <div class="theme-select">NIGHT</div>
-    <div class="nav-badge">PUBLIC YOUTUBE DATA</div>
+    <a class="nav-link" href="/">Overview</a>
+    <a class="nav-link nav-link-strong" href="/studio">✦ Content Studio</a>
     <div class="nav-user-pill" id="navUserPill">
       <img id="navUserImg" src="" alt="">
       <span id="navUserName"></span>
@@ -563,9 +566,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 <!-- HERO -->
 <section id="hero">
   <div class="hero-glow"></div>
-  <div class="hero-eyebrow">🔬 Channel Intelligence Platform</div>
-  <h1 class="hero-title">DECODE YOUR<br><span class="accent">YOUTUBE</span><br><span class="accent2">CHANNEL</span></h1>
-  <p class="hero-sub">Analyze a YouTube channel with the official API. See measured recent uploads and public interactions, then get optional AI-assisted content ideas.</p>
+  <div class="hero-eyebrow">✧ THE CREATOR INTELLIGENCE WORKSPACE</div>
+  <h1 class="hero-title">Better insights.<br><span class="accent">Better content.</span><br><span class="accent2">Real growth.</span></h1>
+  <p class="hero-sub">Understand what your channel is actually doing. Explore real YouTube data, study competitors, and turn your next 30 uploads into an evidence-led content plan.</p>
   <div class="search-wrap">
     <div class="search-inner">
       <input type="text" id="channelInput" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx · channel ID or @handle" spellcheck="false"
@@ -614,6 +617,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       </div>
     </div>
     <div class="dash-actions">
+      <a class="nav-link nav-link-strong" href="/studio" id="openStudioDash">✦ REVIEW CONTENT CALENDAR</a>
       <button class="compare-btn" id="compareBtn" onclick="startCompare()" style="display:none">⇄ COMPARE CHANNEL</button>
       <button class="back-btn" onclick="goBack()">← NEW ANALYSIS</button>
     </div>
@@ -1115,6 +1119,7 @@ async function buildRealChannelData(channelId){
 /* ════════════════════════════════
    UI FLOW
    ════════════════════════════════ */
+function studioPublicSnapshot(d){return {channelId:d.channelId,name:d.name,handle:d.handle||'',observedAt:d.observedAt,subs:d.subs,views:d.views,videoCount:d.videoCount,recent:(d.rawVideos||[]).slice(0,35).map(v=>({id:v.id,title:v.snippet?.title||'',publishedAt:v.snippet?.publishedAt||'',views:numberOrNull(v.statistics?.viewCount),likes:numberOrNull(v.statistics?.likeCount),comments:numberOrNull(v.statistics?.commentCount)}))};}
 function demoLoad(id){document.getElementById('channelInput').value=id;startAnalysis()}
 
 async function startAnalysis(){
@@ -1128,6 +1133,7 @@ async function startAnalysis(){
     const data=await buildRealChannelData(channelId);
     ['s2','s3','s4','s5'].forEach(id=>document.getElementById(id).className='step-item done');
     channelContext=data;chatHistory=[];
+    try{sessionStorage.setItem("tubeiq_channel_v2",JSON.stringify(studioPublicSnapshot(data)));}catch{}
     isOwnChannel=!!(googleAccessToken&&ownerChannelId===channelId);
     hideLoading();renderDashboard(data);
   }catch(err){
@@ -1232,9 +1238,9 @@ function renderCharts(d){
   Chart.defaults.font.family="'DM Mono',monospace";
   charts.line=new Chart(document.getElementById('lineChart'),{
     type:'line',data:{labels:d.labels,datasets:[
-      {label:'Avg public likes / views %',data:d.engagementData,borderColor:'#ff2d2d',
+      {label:'Avg public likes / views %',data:d.engagementData,borderColor:'#a58bfb',
         backgroundColor:'rgba(255,45,45,0.12)',borderWidth:2,pointRadius:3,tension:.25,yAxisID:'y',spanGaps:false},
-      {label:'Uploads in sample',data:d.videosData,borderColor:'#00d4ff',
+      {label:'Uploads in sample',data:d.videosData,borderColor:'#7adbd0',
         backgroundColor:'rgba(0,212,255,0.08)',borderWidth:2,pointRadius:3,tension:.25,yAxisID:'y1'}
     ]},options:{responsive:true,interaction:{mode:'index',intersect:false},
       plugins:{legend:{position:'top',labels:{boxWidth:9}}},
@@ -1245,13 +1251,13 @@ function renderCharts(d){
     type:'bar',data:{labels:['Views','Likes','Comments'],datasets:[{
       label:'Average per sampled public video',
       data:[d.sampleMetrics.avgViews,d.sampleMetrics.avgLikes,d.sampleMetrics.avgComments],
-      backgroundColor:['#ff2d2d','#00d4ff','#00e5a0'],borderRadius:5
+      backgroundColor:['#a58bfb','#7adbd0','#79dbb8'],borderRadius:5
     }]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
       scales:{x:{beginAtZero:true,grid:{color:palette.gridLineColor},ticks:{callback:v=>fmtNum(v)}},
         y:{grid:{display:false}}}}});
   charts.donut=new Chart(document.getElementById('donutChart'),{
     type:'doughnut',data:{labels:Object.keys(d.contentMix),datasets:[{
-      data:Object.values(d.contentMix),backgroundColor:['#ff2d2d','#00d4ff','#00e5a0','#f5c842','#7c2cf0'],
+      data:Object.values(d.contentMix),backgroundColor:['#a58bfb','#7adbd0','#79dbb8','#eac18e','#796af8'],
       borderColor:palette.panelBackgroundColor,borderWidth:3,hoverOffset:6
     }]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
       plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,pointStyle:'circle',usePointStyle:true,font:{size:10}}}}}});
@@ -1729,6 +1735,7 @@ async function loadCompare(){
     var cmpData=await buildRealChannelData(cid);
     document.getElementById('cmpLoading').classList.remove('show');
     renderCompare(channelContext,cmpData);
+    try{sessionStorage.setItem("tubeiq_competitor_v2",JSON.stringify(studioPublicSnapshot(cmpData)));}catch{}
     document.getElementById('cmpBody').classList.add('show');
   }catch(e){
     document.getElementById('cmpLoading').classList.remove('show');
@@ -1770,8 +1777,8 @@ function renderCompare(a,b){
       }]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
         scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtNum(v)}},y:{grid:{display:false}}}}};
     }
-    cmpCharts.r1=new Chart(document.getElementById('cmpRadar1'),chartCfg(a,'#ff2d2d'));
-    cmpCharts.r2=new Chart(document.getElementById('cmpRadar2'),chartCfg(b,'#00d4ff'));
+    cmpCharts.r1=new Chart(document.getElementById('cmpRadar1'),chartCfg(a,'#a58bfb'));
+    cmpCharts.r2=new Chart(document.getElementById('cmpRadar2'),chartCfg(b,'#7adbd0'));
   }
   const notes=[
     'Each comparison uses up to 50 public uploads per channel, not a shared historical period.',
