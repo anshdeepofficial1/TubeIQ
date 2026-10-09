@@ -25,8 +25,8 @@ assert.equal(col(['ਮਿਤੀ','ਪੁਰਾਣਾ ਟਾਈਟਲ','ਨਵਾ
 assert.equal(input('@rojanabhaktii').forHandle,'@rojanabhaktii');
 assert.equal(input('UCX6OQ3DkcsbYNE6H8uQQuVA').id,'UCX6OQ3DkcsbYNE6H8uQQuVA');
 assert.throws(()=>input('https://example.com/@someone'),/YouTube channel URL/);
-assert.equal(ai('{"reviews":[{"id":1,"decision":"keep"}]}').reviews[0].id,1);
-assert.equal(ai('```json\n{"reviews":[]}\n```').reviews.length,0);
+assert.equal(ai('{"reviews":[{"id":1,"decision":"keep"}]}')[0].id,1);
+assert.equal(ai('```json\n{"reviews":[]}\n```').length,0);
 assert.throws(()=>ai('invalid'),/parseable review JSON/);
 assert.equal(safeCsv('=HYPERLINK(1)'), '"\'=HYPERLINK(1)"');
 assert.equal(safeCsv('one"two'),'"one""two"');
