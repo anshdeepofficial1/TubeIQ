@@ -116,6 +116,7 @@ async function importFile(file){
  if(!file)return;
  if(file.size>MAX_FILE){toast('File is larger than 5 MB. Please use a smaller sheet.');return}
  if(!/\.(xlsx|xls|csv)$/i.test(file.name)){toast('Choose an Excel .xlsx / .xls file or .csv.');return}
+ if(state.rows.length&&!window.confirm('Replace your current plan with this spreadsheet? Save or export it first if needed.'))return;
  try{
   const buffer=await file.arrayBuffer();
   let matrix,book=null,bytes=null,sheetName='CSV import';
@@ -142,6 +143,7 @@ async function importFile(file){
   state.rows=[];state.activeId=null;
   mapColumns();
   $('columnMapping').hidden=false;
+  $('importReviewPanel').hidden=false;
   $('fileSummary').hidden=false;
   $('fileSummary').textContent='✓ '+state.filename+' • '+validRows.length+' data rows • '+state.header.length+' columns • '+sheetName;
   toast('Spreadsheet parsed. Confirm the column mapping to continue.');
@@ -160,7 +162,7 @@ function applyMapping(){
   if(!r.oldTitle&&!r.userTitle&&!r.notes)r.issues.push('No title or topic provided.');
   if(r.userTitle.length>100)r.issues.push('Your new title exceeds the 100-character YouTube title limit.');
   if(r.oldTitle&&r.userTitle&&normalize(r.oldTitle)===normalize(r.userTitle))r.issues.push('Revised title has no material wording change (this may be fine).');
-  if(!r.date)r.issues.push('Publishing date not supplied (optional).');
+  // Missing dates are allowed for unscheduled ideas.
   return r;
  });
  const counts=new Map(),dates=new Map();
