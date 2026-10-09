@@ -1503,9 +1503,16 @@ function openLoginModal(){
   renderGoogleSignInButton(false);
 }
 function closeLoginModal(){document.getElementById('loginModal').classList.remove('open')}
+let googleButtonRetries=0;
 function renderGoogleSignInButton(shouldReRender){
   var btnEl=document.getElementById('googleSignInBtn');
-  if(!btnEl||!window.google)return;
+  if(!btnEl)return;
+  if(!window.google?.accounts?.id){
+    if(googleButtonRetries++<12)setTimeout(()=>renderGoogleSignInButton(false),400);
+    else showAlert('Google sign-in did not load. Check your connection or browser blockers.');
+    return;
+  }
+  googleButtonRetries=0;
   if(shouldReRender)btnEl.textContent='';
   if(btnEl.hasChildNodes())return;
   var buttonTheme='filled_black';
@@ -1557,8 +1564,14 @@ function handleGoogleIdToken(resp){
   requestYTToken();
 }
 
+let ytTokenRetries=0;
 function requestYTToken(){
-  if(!window.google||!window.google.accounts||!window.google.accounts.oauth2){setTimeout(requestYTToken,600);return}
+  if(!window.google?.accounts?.oauth2){
+    if(ytTokenRetries++<12)setTimeout(requestYTToken,400);
+    else{closeLoginModal();showAlert('Google OAuth did not load. Please retry.');}
+    return;
+  }
+  ytTokenRetries=0;
   var tc=google.accounts.oauth2.initTokenClient({
     client_id:G_CLIENT,
     scope:'https://www.googleapis.com/auth/youtube.readonly',
@@ -1578,6 +1591,7 @@ async function handleYTToken(tr){
   try{
     var res=await fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true',{headers:{'Authorization':'Bearer '+googleAccessToken}});
     var data=await res.json();
+    if(!res.ok||data.error)throw new Error(data.error?.message||'Could not read this Google account\'s channels.');
     var items=data.items||[];
     if(items.length===0){
       lsShow(4);
@@ -1589,7 +1603,11 @@ async function handleYTToken(tr){
     } else {
       ownerChannels=items;lsShow(3);renderChPicker(items);
     }
-  }catch(e){lsShow(4);}
+  }catch(e){
+    logoutGoogle();
+    closeLoginModal();
+    showAlert('YouTube authorization failed: '+(e.message||'Unknown error'));
+  }
 }
 
 function renderChPicker(items){
@@ -1597,7 +1615,7 @@ function renderChPicker(items){
     var thumb=ch.snippet&&ch.snippet.thumbnails&&(ch.snippet.thumbnails.medium||ch.snippet.thumbnails.default);
     var src=thumb?thumb.url:'';
     var subs=ch.statistics&&ch.statistics.subscriberCount?fmtNum(ch.statistics.subscriberCount)+' subs':'—';
-    var av=src?('<img class="ch-picker-avatar" src="'+src+'">')
+    var av=src?('<img class="ch-picker-avatar" alt="" src="'+esc(src)+'">')
               :('<div class="ch-picker-avatar-fb">'+ch.snippet.title.charAt(0)+'</div>');
     return '<div class="ch-picker-item" onclick="pickOwnerChannel(\''+ch.id+'\')">'
       +av+'<div class="ch-picker-info"><h4>'+esc(ch.snippet.title)+'</h4><p>'+subs+' · '+(ch.snippet.customUrl||ch.id)+'</p></div>'
@@ -1607,7 +1625,11 @@ function renderChPicker(items){
 function pickOwnerChannel(id){ownerChannelId=id;closeLoginModal();document.getElementById('channelInput').value=id;startAnalysis();}
 
 function logoutGoogle(){
+  const previousToken=googleAccessToken;
   googleUser=null;googleAccessToken=null;ownerChannelId=null;ownerChannels=[];isOwnChannel=false;
+  if(previousToken&&window.google?.accounts?.oauth2?.revoke){
+    google.accounts.oauth2.revoke(previousToken,()=>{});
+  }
   document.getElementById('navLoginBtn').style.display='flex';
   document.getElementById('navUserPill').classList.remove('active');
   var vb=document.getElementById('verifiedBadge');if(vb)vb.className='verified-badge';
@@ -1624,6 +1646,12 @@ window.addEventListener('load',function(){
 window.addEventListener('resize',function(){
   var modal=document.getElementById('loginModal');
   if(modal&&modal.classList.contains('open'))renderGoogleSignInButton(true);
+});
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  if(document.getElementById('cmpOverlay').classList.contains('open'))closeCmp();
+  if(document.getElementById('loginModal').classList.contains('open'))closeLoginModal();
+  if(document.getElementById('chatPanel').classList.contains('open'))toggleChat();
 });
 
 /* ════════════════════════════════
