@@ -54,23 +54,42 @@
 <p>Video samples cover up to the latest 50 public uploads per channel. Differing upload dates, ages and formats mean that sample averages are descriptive—not like-for-like performance forecasts. No competitor Studio CTR, retention, revenue or audience data is available.</p>
 </div>
 <div class="studio-evidence-note" id="channelNote">ⓘ Only publicly available counts and a sample of up to 50 recent public uploads are analyzed. Competitor retention, CTR and private performance are not available.</div></section>
-<section class="studio-section" id="importCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">STEP 02 / KEEP YOUR EXISTING WORK</div><h2>Import your content calendar</h2><p>Existing dates, old titles and your manually written new titles are preserved.</p></div><span class="studio-section-number">02</span></div>
-<div class="studio-panel">
-<div class="studio-dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload Excel or CSV"><div class="studio-upload-symbol">↥</div><h3>Drop an Excel file here</h3><p>Or click to select .xlsx, .xls or .csv • Maximum 5 MB • Up to 150 rows</p><button class="studio-btn studio-btn-primary" type="button" id="selectFile">Choose a file →</button><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden></div>
+<section class="studio-section" id="importCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">STEP 02 / YOUR CONTENT, YOUR FORMAT</div><h2>Share your content plan</h2><p>Paste a table, describe your ideas in normal text, enter a single video, or optionally upload a spreadsheet.</p></div><span class="studio-section-number">02</span></div>
+<div class="studio-panel studio-compose-panel">
+<div class="studio-compose-top"><div class="studio-panel-head"><div class="studio-panel-icon">✎</div><div><h3>Tell TubeIQ what you're planning</h3><p>Start with a message. Excel is completely optional.</p></div></div><span class="studio-format-label">TEXT FIRST</span></div>
+<label class="studio-compose-label" for="planMessage">YOUR CONTENT MESSAGE OR TABLE</label>
+<textarea id="planMessage" class="studio-message-input" rows="8" maxlength="12000" spellcheck="false" placeholder="Paste your 30-day calendar, for example:&#10;&#10;Date | Old Title | My New Title&#10;10 Oct 2026 | Guru Ki Bani | Guru Ki Bani Suno, Mann Nu Shanti Milegi&#10;11 Oct 2026 | Bhagat Ravidas Ji | Bhagat Ravidas Ji De Bachan&#10;&#10;Or just describe each planned video in your own words. You don't need a spreadsheet."></textarea>
+<div class="studio-composer-actions"><span>Supports copied Excel cells, Markdown tables, CSV, dated lists and freeform descriptions.</span><div>
+<button class="studio-btn studio-btn-outline" id="parseText" type="button">Import table / list →</button>
+<button class="studio-btn studio-btn-primary" id="extractTextAI" type="button">✦ Understand with AI</button>
+</div></div>
+<div class="studio-compose-caption" id="textHelp">Structured tables are parsed on your device. The AI option sends only your entered text to Gemini for extraction and requires your review before import.</div>
+</div>
+<details class="studio-manual-toggle" id="manualToggle"><summary><span>＋</span> Add one video manually <small>Ideal for a quick idea or title</small></summary>
+<div class="studio-manual-form"><div class="studio-manual-grid"><label>Planned date <span>(optional)</span><input id="manualDate" type="text" placeholder="e.g. 10 Oct 2026"></label>
+<label>Old title <span>(optional)</span><input id="manualOld" type="text" placeholder="Original recording title"></label>
+<label>Your title or content idea <span>(required)</span><input id="manualNew" type="text" placeholder="What the video is about"></label>
+<label>Content notes <span>(optional)</span><input id="manualNotes" type="text" placeholder="Speaker, shabad, audience, etc."></label></div>
+<div class="studio-flex-end"><button id="addManual" type="button" class="studio-btn studio-btn-outline">＋ Add to calendar</button></div></div></details>
+<details class="studio-file-toggle" id="fileToggle"><summary><span>▤</span> Have an Excel file instead? <small>Upload .xlsx, .xls or .csv (optional)</small></summary>
+<div class="studio-panel studio-file-panel">
+<div class="studio-dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload optional Excel or CSV"><div class="studio-upload-symbol">↥</div><h3>Drop your spreadsheet here</h3><p>Maximum 5 MB • Up to 150 rows</p><button class="studio-btn studio-btn-outline" type="button" id="selectFile">Browse files →</button><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden></div>
+</div></details>
+<div class="studio-panel studio-import-review">
 <div id="fileSummary" class="studio-file-summary" hidden></div>
-<div id="columnMapping" class="studio-mapping" hidden><div class="studio-mapping-head"><h3>Map your spreadsheet columns</h3><p>Choose the correct columns. We won't guess if they are unclear.</p></div><div class="studio-mapping-grid">
-<label>Date<select id="colDate"></select></label><label>Old / Original Title<select id="colOld"></select></label><label>Your New Title<select id="colNew"></select></label><label>Content Notes (optional)<select id="colNotes"></select></label></div>
+<div id="columnMapping" class="studio-mapping" hidden><div class="studio-mapping-head"><h3>Confirm the imported columns</h3><p>Check how we interpreted your message, copied table or uploaded spreadsheet before importing.</p></div><div class="studio-mapping-grid">
+<label>Date<select id="colDate"></select></label><label>Old / Original Title (optional)<select id="colOld"></select></label><label>Your New Title / Topic<select id="colNew"></select></label><label>Content Notes (optional)<select id="colNotes"></select></label></div>
 <div class="studio-flex-end"><button id="applyMapping" class="studio-btn studio-btn-primary" type="button">Import these rows →</button></div></div>
-</div></section>
+</div></div></section>
 <section class="studio-section" id="reviewCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">STEP 03 / REVIEW, DON'T RANDOMLY REWRITE</div><h2>Review & approve your titles</h2><p>We preserve good titles, flag unclear facts, and propose better alternatives only where useful.</p></div><span class="studio-section-number">03</span></div>
 <div class="studio-panel studio-review-shell">
-<div class="studio-review-toolbar"><div class="studio-review-copy"><strong id="sheetLabel">No calendar imported</strong><span id="reviewProgressLabel">Upload a file to begin reviewing your work.</span></div><div class="studio-toolbar-actions">
+<div class="studio-review-toolbar"><div class="studio-review-copy"><strong id="sheetLabel">No calendar imported</strong><span id="reviewProgressLabel">Write, paste or upload a content plan to start reviewing.</span></div><div class="studio-toolbar-actions">
 <button id="auditBtn" class="studio-btn studio-btn-primary" type="button" disabled>✦ Review all with AI</button>
 <button id="cancelBtn" class="studio-btn studio-btn-outline" type="button" hidden>Stop</button>
 <button id="exportBtn" class="studio-btn studio-btn-outline" type="button" disabled>↓ Export Excel</button>
 </div></div>
 <div class="studio-progress-rail" id="progressRail" hidden><div id="progressFill"></div></div>
-<div class="studio-notice" id="reviewNotice" role="status" aria-live="polite">Connect your channel first for channel-specific AI recommendations. Without it, you can still import and inspect spreadsheet problems.</div>
+<div class="studio-notice" id="reviewNotice" role="status" aria-live="polite">Connect a channel for channel-aware AI feedback, and share a plan as text or an optional spreadsheet. You can build your calendar before connecting.</div>
 <div class="studio-filters" id="reviewFilters" hidden><div class="studio-filter-tabs"><button class="selected" data-filter="all">All</button><button data-filter="keep">Keep</button><button data-filter="improve">Improve</button><button data-filter="verify">Verify</button><button data-filter="pending">Pending</button></div><label class="studio-search-label"><span>⌕</span><input id="rowSearch" placeholder="Find a date or title…" type="search"></label></div>
 <div class="studio-table-wrap"><table class="studio-table"><thead><tr><th>DATE</th><th>YOUR EXISTING TITLE</th><th>AI DECISION</th><th>FINAL TITLE</th><th></th></tr></thead><tbody id="reviewRows"><tr><td colspan="5"><div class="studio-table-empty">Your content calendar will appear here once imported.</div></td></tr></tbody></table></div>
 <div class="studio-review-foot"><span>AI suggestions are editorial hypotheses, not guaranteed search rankings, views or upload times.</span><div><button id="saveDraft" class="studio-btn studio-btn-text" type="button" disabled>Save on this device</button><button id="clearDraft" class="studio-btn studio-btn-text" type="button">Clear local draft</button></div></div>
