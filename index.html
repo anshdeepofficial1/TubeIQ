@@ -690,6 +690,33 @@ footer a:hover{text-decoration:underline}
 </div>
 
 
+<!-- REAL CHANNEL COMPARISON -->
+<div class="cmp-overlay" id="cmpOverlay" role="dialog" aria-modal="true" aria-label="Compare public YouTube channel metrics">
+  <div class="cmp-box">
+    <div class="cmp-head"><h3>COMPARE PUBLIC CHANNEL DATA</h3>
+      <button class="cmp-close" type="button" onclick="closeCmp()" aria-label="Close comparison">✕</button>
+    </div>
+    <div class="cmp-search">
+      <input id="cmpInput" class="cmp-input" type="text" placeholder="Channel ID, @handle or YouTube channel link"
+        aria-label="Channel to compare" onkeydown="if(event.key==='Enter')loadCompare()">
+      <button id="cmpLoadBtn" class="btn-cmp-load" type="button" onclick="loadCompare()">COMPARE →</button>
+    </div>
+    <div id="cmpLoading" class="cmp-loading">Reading current public data from YouTube…</div>
+    <div id="cmpBody" class="cmp-body">
+      <div class="cmp-cols" id="cmpCols"></div>
+      <div class="cmp-radar-wrap">
+        <div class="cmp-radar-panel"><div class="cmp-radar-title" id="cmpRadarTitle1"></div>
+          <div style="height:230px"><canvas id="cmpRadar1"></canvas></div></div>
+        <div class="cmp-radar-panel"><div class="cmp-radar-title" id="cmpRadarTitle2"></div>
+          <div style="height:230px"><canvas id="cmpRadar2"></canvas></div></div>
+      </div>
+      <div class="cmp-insight-box"><div class="cmp-insight-title">COMPARISON NOTES · PUBLIC DATA ONLY</div>
+        <div class="cmp-insight-list" id="cmpInsights"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- CHATBOT FAB -->
 <button class="chat-fab" id="chatFab" onclick="toggleChat()">
   🤖<div class="chat-notif">AI</div>
@@ -1636,39 +1663,54 @@ async function loadCompare(){
   btn.disabled=false;
 }
 function renderCompare(a,b){
-  function tag(va,vb){var na=parseFloat(String(va).replace(/[^0-9.]/g,''));var nb=parseFloat(String(vb).replace(/[^0-9.]/g,''));if(isNaN(na)||isNaN(nb))return['tie','tie'];if(na>nb)return['win','lose'];if(nb>na)return['lose','win'];return['tie','tie'];}
-  var metrics=[
-    {label:'Subscribers',va:fmtNum(a.subs),vb:fmtNum(b.subs),raw:[a.subs,b.subs]},
-    {label:'Total Views',va:fmtNum(a.views),vb:fmtNum(b.views),raw:[a.views,b.views]},
-    {label:'Avg Engagement',va:a.engRate+'%',vb:b.engRate+'%',raw:[a.engRate,b.engRate]},
-    {label:'Upload Freq',va:a.uploadFreq,vb:b.uploadFreq,raw:[null,null]},
-    {label:'Niche Confidence',va:a.confidence+'%',vb:b.confidence+'%',raw:[a.confidence,b.confidence]},
-    {label:'Video Count',va:fmtNum(a.videoCount),vb:fmtNum(b.videoCount),raw:[a.videoCount,b.videoCount]},
+  const metrics=[
+    {label:'Public subscribers',values:[a.subs,b.subs],render:fmtNum},
+    {label:'Lifetime channel views',values:[a.views,b.views],render:fmtNum},
+    {label:'Channel video count',values:[a.videoCount,b.videoCount],render:fmtNum},
+    {label:'Public uploads sampled',values:[a.rawVideos.length,b.rawVideos.length],render:fmtNum},
+    {label:'Avg likes / views',values:[a.engRate,b.engRate],
+      render:v=>v===null?'—':v+'%'},
+    {label:'Mean sampled upload gap',values:[a.uploadFreq,b.uploadFreq],render:v=>v}
   ];
-  function chanCol(d,isYou){
-    var av=d.thumbnailUrl?'<img src="'+d.thumbnailUrl+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">':'<span style="font-family:Bebas Neue,sans-serif;font-size:20px">'+d.name.charAt(0)+'</span>';
-    return '<div><div class="cmp-ch-head"><div class="cmp-ch-avatar">'+av+'</div>'
-      +'<div><div class="cmp-ch-name">'+esc(d.name)+'</div><div class="cmp-ch-sub">'+d.niche+' · '+(d.handle||d.channelId)+'</div>'
-      +(isYou?'<span class="cmp-you-badge">YOUR CHANNEL</span>':'')+'</div></div>'
-      +'<div class="cmp-stat-grid">'+metrics.map(function(m){
-        var t=m.raw[0]!==null?tag(m.raw[0],m.raw[1]):['tie','tie'];
-        var cls=isYou?t[0]:t[1];var val=isYou?m.va:m.vb;
-        return '<div class="cmp-stat-row"><div class="cmp-stat-label">'+m.label+'</div><div class="cmp-stat-val '+cls+'">'+val+'</div></div>';
-      }).join('')+'</div></div>';
+  function column(d,index){
+    const avatar=d.thumbnailUrl?'<img alt="" src="'+esc(d.thumbnailUrl)+'">':
+      '<span>'+esc(d.name.charAt(0))+'</span>';
+    return '<div><div class="cmp-ch-head"><div class="cmp-ch-avatar">'+avatar+'</div>'+
+      '<div><div class="cmp-ch-name">'+esc(d.name)+'</div>'+
+      '<div class="cmp-ch-sub">'+esc(d.handle||d.channelId)+'</div>'+
+      (index===0?'<span class="cmp-you-badge">CURRENT CHANNEL</span>':'')+
+      '</div></div><div class="cmp-stat-grid">'+metrics.map(m=>
+        '<div class="cmp-stat-row"><div class="cmp-stat-label">'+esc(m.label)+'</div>'+
+        '<div class="cmp-stat-val tie">'+esc(m.render(m.values[index]))+'</div></div>'
+      ).join('')+'</div></div>';
   }
-  document.getElementById('cmpCols').innerHTML=chanCol(a,true)+chanCol(b,false);
-  document.getElementById('cmpRadarTitle1').textContent=a.name.toUpperCase();
-  document.getElementById('cmpRadarTitle2').textContent=b.name.toUpperCase();
-  Object.values(cmpCharts).forEach(function(c){c.destroy();});cmpCharts={};
-  function radarCfg(scores,color){var palette=getThemePalette();return{type:'radar',data:{labels:['Engagement','Consistency','SEO','Thumbnails','Retention','Growth'],datasets:[{data:scores,borderColor:color,backgroundColor:color.replace('rgb','rgba').replace(')',',0.12)'),borderWidth:2,pointBackgroundColor:color,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{angleLines:{color:palette.strongGridLineColor},grid:{color:palette.strongGridLineColor},pointLabels:{font:{size:9},color:palette.secondaryTextColor},ticks:{display:false},min:0,max:100}}}};}
-  cmpCharts.r1=new Chart(document.getElementById('cmpRadar1'),radarCfg(a.radarScores,'#ff2d2d'));
-  cmpCharts.r2=new Chart(document.getElementById('cmpRadar2'),radarCfg(b.radarScores,'#00d4ff'));
-  var insights=[];
-  var rl=['Engagement','Consistency','SEO','Thumbnails','Retention','Growth'];
-  rl.forEach(function(l,i){var diff=a.radarScores[i]-b.radarScores[i];if(diff<=-20)insights.push({icon:'⚠️',text:'<strong>'+l+':</strong> You are '+Math.abs(diff)+' points behind.'});else if(diff>=20)insights.push({icon:'✅',text:'<strong>'+l+':</strong> You lead by '+diff+' points — competitive advantage.'});});
-  if(parseFloat(a.engRate)>parseFloat(b.engRate)*1.5)insights.push({icon:'🏆',text:'Your engagement rate ('+a.engRate+'%) is far higher than theirs ('+b.engRate+'%). Your audience is more active.'});
-  if(!insights.length)insights.push({icon:'📊',text:'Both channels are closely matched. Check content pattern insights for key differentiators.'});
-  document.getElementById('cmpInsights').innerHTML=insights.map(function(i){return '<div class="cmp-insight-item"><span style="flex-shrink:0">'+i.icon+'</span><div>'+i.text+'</div></div>';}).join('');
+  document.getElementById('cmpCols').innerHTML=column(a,0)+column(b,1);
+  document.getElementById('cmpRadarTitle1').textContent=a.name+' · AVG PER SAMPLED VIDEO';
+  document.getElementById('cmpRadarTitle2').textContent=b.name+' · AVG PER SAMPLED VIDEO';
+  Object.values(cmpCharts).forEach(c=>c.destroy());cmpCharts={};
+  if(typeof Chart!=='undefined'){
+    function chartCfg(d,color){
+      return{type:'bar',data:{labels:['Views','Likes','Comments'],datasets:[{
+        label:'Mean public count',data:[d.sampleMetrics.avgViews,d.sampleMetrics.avgLikes,d.sampleMetrics.avgComments],
+        backgroundColor:color,borderRadius:5
+      }]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+        scales:{x:{beginAtZero:true,ticks:{callback:v=>fmtNum(v)}},y:{grid:{display:false}}}}};
+    }
+    cmpCharts.r1=new Chart(document.getElementById('cmpRadar1'),chartCfg(a,'#ff2d2d'));
+    cmpCharts.r2=new Chart(document.getElementById('cmpRadar2'),chartCfg(b,'#00d4ff'));
+  }
+  const notes=[
+    'Each comparison uses up to 50 public uploads per channel, not a shared historical period.',
+    'Lifetime channel totals are directly from YouTube; video averages use available public counters.',
+    'A higher view or like total alone does not prove stronger retention, CTR or audience quality.'
+  ];
+  if(a.engRate!==null&&b.engRate!==null)
+    notes.unshift(a.name+': '+a.engRate+'% vs '+b.name+': '+b.engRate+
+      '% mean sampled video likes/views (different uploads and dates).');
+  else notes.unshift('Comparable public like/view data is missing for at least one channel.');
+  document.getElementById('cmpInsights').innerHTML=notes.map(n=>
+    '<div class="cmp-insight-item"><span>•</span><div>'+esc(n)+'</div></div>'
+  ).join('');
 }
 
 </script>
