@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080b13">
+<meta name="theme-color" content="#0b0e15">
 <title>Content Studio — TubeIQ</title>
 <meta name="description" content="Audit your existing 30-day YouTube content calendar using actual channel evidence, controlled AI suggestions and Excel export.">
 <link rel="canonical" href="https://ytengine.vercel.app/studio">
@@ -28,43 +28,29 @@
 <div class="studio-side-bottom"><div class="studio-privacy-icon">⌁</div><strong>Evidence over hype.</strong><p>Only official public API metrics. No fabricated scores or guaranteed virality.</p></div>
 </aside>
 <div class="studio-page">
-<header class="studio-topbar"><div class="studio-breadcrumb">WORKSPACE <span>/</span> CONTENT STUDIO</div><div class="studio-top-actions"><span class="studio-online">● LOCAL WORKSPACE</span><a href="/" class="studio-top-link">← Back to dashboard</a></div></header>
+<header class="studio-topbar"><div class="studio-breadcrumb"><span class="studio-top-mark">✳</span><strong>Content Studio</strong><span class="studio-breadcrumb-sub">/ Workspace</span></div><div class="studio-top-actions"><span class="studio-online">● LOCAL WORKSPACE</span><a href="/" class="studio-top-link">← Back to dashboard</a></div></header>
 <main class="studio-main">
-<section class="studio-intro"><div class="studio-eyebrow">✦ TUBEIQ INTELLIGENCE SUITE <span> / 01</span></div>
-<div class="studio-intro-row"><div><h1>Your next 30 days,<br><em>thoughtfully optimized.</em></h1>
-<p>Bring the calendar you've already built. We compare your old and new titles against actual YouTube channel evidence, then recommend changes only when justified.</p></div>
-<div class="studio-intro-decoration" aria-hidden="true"><span>30</span><small>DAYS<br>ONE PLAN</small></div></div>
+<section class="studio-intro"><div class="studio-eyebrow"><span class="studio-eyebrow-dot"></span> THE CREATOR WORKSPACE</div>
+<div class="studio-intro-row"><div><h1>Make every upload<br><em>count.</em></h1>
+<p>Bring your ideas, titles or existing calendar. Get thoughtful feedback grounded in real YouTube data—not random viral promises.</p></div>
+<div class="studio-intro-decoration" aria-hidden="true"><span class="studio-deco-icon">✳</span><small>YOUR NEXT<br>GREAT UPLOAD</small></div></div>
 <div class="studio-trust"><span>✓ Your original data stays intact</span><span>✓ Every suggestion has a reason</span><span>✓ Nothing changes without approval</span></div></section>
-<section class="studio-metrics" aria-label="Content planning progress">
-<div class="studio-stat"><small>CALENDAR ENTRIES</small><strong id="countEntries">—</strong><span>Rows imported</span></div>
+<section class="studio-metrics" id="studioMetrics" aria-label="Content planning progress" hidden>
+<div class="studio-stat"><small>CALENDAR ENTRIES</small><strong id="countEntries">—</strong><span>Entries in your plan</span></div>
 <div class="studio-stat"><small>AI REVIEWED</small><strong id="countReviewed">—</strong><span>Evidence-based decisions</span></div>
 <div class="studio-stat"><small>APPROVED TITLES</small><strong id="countApproved">—</strong><span>Your final selections</span></div>
 <div class="studio-stat"><small>NEEDS ATTENTION</small><strong id="countAttention">—</strong><span>Verification or revision</span></div>
 </section>
-<section class="studio-section" id="channelCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">STEP 01 / GROUND THE ANALYSIS</div><h2>Connect channel intelligence</h2><p>Your public uploads and competitors are real context—not an invented prediction.</p></div><span class="studio-section-number">01</span></div>
-<div class="studio-two-col">
-<div class="studio-panel"><div class="studio-panel-head"><div class="studio-panel-icon">▶</div><div><h3>Your YouTube channel</h3><p>Paste a channel link, @handle or channel ID.</p></div></div>
-<div class="studio-inline-input"><input id="yourChannel" type="text" placeholder="@rojanabhaktii" aria-label="Your channel handle"><button id="loadChannel" class="studio-btn studio-btn-primary" type="button">Analyze channel</button></div>
-<div class="studio-channel-result" id="channelResult"><span class="studio-unset">No channel connected yet. You can import a sheet first.</span></div></div>
-<div class="studio-panel"><div class="studio-panel-head"><div class="studio-panel-icon studio-icon-competitor">⇄</div><div><h3>Competitor intelligence <span class="studio-optional">OPTIONAL</span></h3><p>Benchmark titles and observable public content patterns.</p></div></div>
-<div class="studio-inline-input"><input id="competitorChannel" type="text" placeholder="Competitor @handle or channel link" aria-label="Competitor channel"><button id="loadCompetitor" class="studio-btn studio-btn-outline" type="button">Compare</button></div>
-<div class="studio-channel-result" id="competitorResult"><span class="studio-unset">Not connected. Competitor data is never required.</span></div></div>
-</div><div class="studio-competition" id="competitionInsights" hidden>
-<div class="studio-competition-head"><div><span class="studio-section-kicker">PUBLIC DATA ONLY</span><h3>Competitor comparison</h3></div><span>Measured, not predicted</span></div>
-<div class="studio-competition-grid" id="comparisonMetrics"></div>
-<p>Video samples cover up to the latest 50 public uploads per channel. Differing upload dates, ages and formats mean that sample averages are descriptive—not like-for-like performance forecasts. No competitor Studio CTR, retention, revenue or audience data is available.</p>
-</div>
-<div class="studio-evidence-note" id="channelNote">ⓘ Only publicly available counts and a sample of up to 50 recent public uploads are analyzed. Competitor retention, CTR and private performance are not available.</div></section>
-<section class="studio-section" id="importCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">STEP 02 / YOUR CONTENT, YOUR FORMAT</div><h2>Share your content plan</h2><p>Paste a table, describe your ideas in normal text, enter a single video, or optionally upload a spreadsheet.</p></div><span class="studio-section-number">02</span></div>
+<section class="studio-section" id="importCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">01 <span>/</span> PLAN YOUR CONTENT</div><h2>What are you creating?</h2><p>Start with your own words. A spreadsheet is never required.</p></div><span class="studio-section-number">01</span></div>
 <div class="studio-panel studio-compose-panel">
-<div class="studio-compose-top"><div class="studio-panel-head"><div class="studio-panel-icon">✎</div><div><h3>Tell TubeIQ what you're planning</h3><p>Start with a message. Excel is completely optional.</p></div></div><span class="studio-format-label">TEXT FIRST</span></div>
-<label class="studio-compose-label" for="planMessage">YOUR CONTENT MESSAGE OR TABLE</label>
-<textarea id="planMessage" class="studio-message-input" rows="8" maxlength="12000" spellcheck="false" placeholder="Paste your 30-day calendar, for example:&#10;&#10;Date | Old Title | My New Title&#10;10 Oct 2026 | Guru Ki Bani | Guru Ki Bani Suno, Mann Nu Shanti Milegi&#10;11 Oct 2026 | Bhagat Ravidas Ji | Bhagat Ravidas Ji De Bachan&#10;&#10;Or just describe each planned video in your own words. You don't need a spreadsheet."></textarea>
-<div class="studio-composer-actions"><span>Supports copied Excel cells, Markdown tables, CSV, dated lists and freeform descriptions.</span><div>
+<div class="studio-compose-top"><div class="studio-panel-head"><div class="studio-panel-icon">✎</div><div><h3>Describe your content</h3><p>Paste a schedule, old titles, or a new idea.</p></div></div><span class="studio-format-label">START HERE</span></div>
+<label class="studio-compose-label" for="planMessage">YOUR IDEA OR CONTENT CALENDAR</label>
+<textarea id="planMessage" class="studio-message-input" rows="5" maxlength="12000" spellcheck="false" placeholder="Tell us what you're planning…&#10;&#10;For example: 10 Oct — Old title: Guru Ki Bani; New title: Guru Ki Bani Suno&#10;&#10;You can also paste a full table or 30-day schedule."></textarea>
+<div class="studio-composer-actions"><span>Plain text, copied tables and dated lists all work.</span><div>
 <button class="studio-btn studio-btn-outline" id="parseText" type="button">Import table / list →</button>
 <button class="studio-btn studio-btn-primary" id="extractTextAI" type="button">✦ Understand with AI</button>
 </div></div>
-<div class="studio-compose-caption" id="textHelp">Structured tables are parsed on your device. The AI option sends only your entered text to Gemini for extraction and requires your review before import.</div>
+<div class="studio-compose-caption" id="textHelp">Table imports stay in your browser. “Understand with AI” sends your message to Gemini for extraction; you approve the entries first.</div>
 </div>
 <details class="studio-manual-toggle" id="manualToggle"><summary><span>＋</span> Add one video manually <small>Ideal for a quick idea or title</small></summary>
 <div class="studio-manual-form"><div class="studio-manual-grid"><label>Planned date <span>(optional)</span><input id="manualDate" type="text" placeholder="e.g. 10 Oct 2026"></label>
@@ -82,8 +68,23 @@
 <label>Date<select id="colDate"></select></label><label>Old / Original Title (optional)<select id="colOld"></select></label><label>Your New Title / Topic<select id="colNew"></select></label><label>Content Notes (optional)<select id="colNotes"></select></label></div>
 <div class="studio-flex-end"><button id="applyMapping" class="studio-btn studio-btn-primary" type="button">Import these rows →</button></div></div>
 </div></section>
-<section class="studio-section" id="reviewCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">STEP 03 / REVIEW, DON'T RANDOMLY REWRITE</div><h2>Review & approve your titles</h2><p>We preserve good titles, flag unclear facts, and propose better alternatives only where useful.</p></div><span class="studio-section-number">03</span></div>
-<div class="studio-panel studio-review-shell">
+<section class="studio-section" id="channelCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">02 <span>/</span> CONNECT THE DATA</div><h2>Understand your channels</h2><p>Use real public video data to make your content review more relevant.</p></div><span class="studio-section-number">02</span></div>
+<div class="studio-two-col">
+<div class="studio-panel"><div class="studio-panel-head"><div class="studio-panel-icon">▶</div><div><h3>Your YouTube channel</h3><p>Connect your channel using a handle or link.</p></div></div>
+<div class="studio-inline-input"><input id="yourChannel" type="text" placeholder="@rojanabhaktii" aria-label="Your channel handle"><button id="loadChannel" class="studio-btn studio-btn-primary" type="button">Analyze channel</button></div>
+<div class="studio-channel-result" id="channelResult"><span class="studio-unset">Nothing connected yet. Add a channel for data-backed AI feedback.</span></div></div>
+<div class="studio-panel"><div class="studio-panel-head"><div class="studio-panel-icon studio-icon-competitor">⇄</div><div><h3>Competitor intelligence <span class="studio-optional">OPTIONAL</span></h3><p>Benchmark titles and observable public content patterns.</p></div></div>
+<div class="studio-inline-input"><input id="competitorChannel" type="text" placeholder="Competitor @handle or channel link" aria-label="Competitor channel"><button id="loadCompetitor" class="studio-btn studio-btn-outline" type="button">Compare</button></div>
+<div class="studio-channel-result" id="competitorResult"><span class="studio-unset">Optional. Add another channel to compare public content patterns.</span></div></div>
+</div><div class="studio-competition" id="competitionInsights" hidden>
+<div class="studio-competition-head"><div><span class="studio-section-kicker">PUBLIC DATA ONLY</span><h3>Competitor comparison</h3></div><span>Measured, not predicted</span></div>
+<div class="studio-competition-grid" id="comparisonMetrics"></div>
+<p>Video samples cover up to the latest 50 public uploads per channel. Differing upload dates, ages and formats mean that sample averages are descriptive—not like-for-like performance forecasts. No competitor Studio CTR, retention, revenue or audience data is available.</p>
+</div>
+<div class="studio-evidence-note" id="channelNote">ⓘ Only publicly available counts and a sample of up to 50 recent public uploads are analyzed. Competitor retention, CTR and private performance are not available.</div></section>
+<section class="studio-section" id="reviewCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">03 <span>/</span> FINALIZE THE DETAILS</div><h2>Review your content</h2><p>See what works, what needs checking and what could be improved.</p></div><span class="studio-section-number">03</span></div>
+<div class="studio-empty-state" id="reviewEmpty"><div class="studio-empty-icon" aria-hidden="true">▤</div><h3>Your review starts here</h3><p>Share a title, a single idea or your entire content plan. We’ll organize it into a review queue.</p><a href="#importCard" class="studio-btn studio-btn-primary studio-empty-cta">Add your content ↗</a></div>
+<div class="studio-panel studio-review-shell" id="reviewShell" hidden>
 <div class="studio-review-toolbar"><div class="studio-review-copy"><strong id="sheetLabel">No calendar imported</strong><span id="reviewProgressLabel">Write, paste or upload a content plan to start reviewing.</span></div><div class="studio-toolbar-actions">
 <button id="auditBtn" class="studio-btn studio-btn-primary" type="button" disabled>✦ Review all with AI</button>
 <button id="cancelBtn" class="studio-btn studio-btn-outline" type="button" hidden>Stop</button>
