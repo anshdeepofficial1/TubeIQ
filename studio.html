@@ -48,7 +48,12 @@
 <div class="studio-panel"><div class="studio-panel-head"><div class="studio-panel-icon studio-icon-competitor">⇄</div><div><h3>Competitor intelligence <span class="studio-optional">OPTIONAL</span></h3><p>Benchmark titles and observable public content patterns.</p></div></div>
 <div class="studio-inline-input"><input id="competitorChannel" type="text" placeholder="Competitor @handle or channel link" aria-label="Competitor channel"><button id="loadCompetitor" class="studio-btn studio-btn-outline" type="button">Compare</button></div>
 <div class="studio-channel-result" id="competitorResult"><span class="studio-unset">Not connected. Competitor data is never required.</span></div></div>
-</div><div class="studio-evidence-note" id="channelNote">ⓘ Only publicly available counts and a sample of up to 50 recent public uploads are analyzed. Competitor retention, CTR and private performance are not available.</div></section>
+</div><div class="studio-competition" id="competitionInsights" hidden>
+<div class="studio-competition-head"><div><span class="studio-section-kicker">PUBLIC DATA ONLY</span><h3>Competitor comparison</h3></div><span>Measured, not predicted</span></div>
+<div class="studio-competition-grid" id="comparisonMetrics"></div>
+<p>Video samples cover up to the latest 50 public uploads per channel. Differing upload dates, ages and formats mean that sample averages are descriptive—not like-for-like performance forecasts. No competitor Studio CTR, retention, revenue or audience data is available.</p>
+</div>
+<div class="studio-evidence-note" id="channelNote">ⓘ Only publicly available counts and a sample of up to 50 recent public uploads are analyzed. Competitor retention, CTR and private performance are not available.</div></section>
 <section class="studio-section" id="importCard"><div class="studio-section-heading"><div><div class="studio-section-kicker">STEP 02 / KEEP YOUR EXISTING WORK</div><h2>Import your content calendar</h2><p>Existing dates, old titles and your manually written new titles are preserved.</p></div><span class="studio-section-number">02</span></div>
 <div class="studio-panel">
 <div class="studio-dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload Excel or CSV"><div class="studio-upload-symbol">↥</div><h3>Drop an Excel file here</h3><p>Or click to select .xlsx, .xls or .csv • Maximum 5 MB • Up to 150 rows</p><button class="studio-btn studio-btn-primary" type="button" id="selectFile">Choose a file →</button><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden></div>
