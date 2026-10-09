@@ -12,6 +12,31 @@
 
 </div>
 
+## New: 30-day Content Studio (v2)
+
+Open [Content Studio](https://ytengine.vercel.app/studio) or select **Content Studio** in the premium redesigned dashboard. This review-first tool does **not** automatically change or publish YouTube videos.
+
+**Workflow**
+1. Connect your real channel using a YouTube @handle, a channel URL, or its UC channel ID. A competitor can also be connected; both use official **public** YouTube channel and up-to-50-recent-upload responses.
+2. Import your existing **.xlsx, .xls or .csv** content calendar (5 MB max, 150 data rows max). Review and manually correct the detected **Date**, **Old Title**, **Your New Title**, and optional **Content Notes** column mapping. An Excel workbook's first sheet is used for import.
+3. The local spreadsheet checks identify missing/repeated titles, repeated upload dates and titles above YouTube's 100-character limit. Nothing is fabricated.
+4. Click **Review all with AI**. Four existing calendar rows per request are reviewed by Gemini with the real channel's recent public title/metrics sample and optional public competitor sample. Suggestions are editorial: **keep**, **improve**, **verify** or **insufficient evidence**. Where specific public video IDs are cited, TubeIQ validates them against the actual data it supplied to AI.
+5. Open any entry to inspect the original date/title, your chosen new title, reasoning, and verified public video links. Keep your own title, accept a suggested alternate, or edit manually; **approval is always required**.
+6. Export a reviewed **Excel workbook**: for Excel imports, the app re-reads the original workbook bytes and appends a separately named **TubeIQ Review** worksheet, preserving the source worksheets as separate tabs on a best-effort basis. Keep the untouched original file to preserve any unsupported advanced formatting/macros/features. If the spreadsheet parser is unavailable, export falls back to formula-safe CSV.
+7. Optional **Save on this device** explicitly saves reviewed text locally to browser storage; it is **not** cloud sync. Clear local draft removes that stored copy. Import and export are otherwise performed in the browser.
+
+**Evidence rules:** Sampled public video view/like counts are current totals, not historical first-day performance. Competitor private CTR/retention and audience behavior are not available. AI cannot verify a Gurbani speaker, specific shabad or quotation from titles alone; audio or a verified transcript is required for such claims. No “viral score,” predicted views, guaranteed publishing hour, or invented growth gap.
+
+**AI data handling:** Only after pressing Review all, the selected old/revised titles, upload dates, optional notes and public channel sample data are submitted through `/api/gemini` to Gemini. The original file itself is parsed locally and is not sent to the AI endpoint. Review results may be inaccurate; the creator must approve every final title.
+
+**Requirements:** The same **`YOUTUBE_API_KEY`** and **`GEMINI_API_KEY`** server-side Vercel environment variables described below. No additional provider keys or cloud database are required for the current browser-session workflow. Full owner-only YouTube Studio CTR, retention, audience timing, persistent backend accounts and automated YouTube publishing are **not implemented**.
+
+**Frontend:** `premium.css` supplies the shared dark plum/lavender/mint design system. `studio.html`, `studio.css`, and `studio.js` implement the responsive Content Studio. Excel parsing/writing uses a pinned, official [SheetJS Community Edition 0.20.3 browser build](https://docs.sheetjs.com/docs/getting-started/installation/standalone/). The official CDN must be reachable to open .xlsx/.xls files.
+
+**Regression tests:** `npm test` runs channel analytics safety checks and Content Studio parsers, bilingual column mapping, CSV formula-injection tests, markup sanity and AI structured-response checks. These are local deterministic tests, not live YouTube/Gemini end-to-end verification.
+
+---
+
 ## What this application actually measures
 
 TubeIQ reads official YouTube Data API v3 responses for a public channel and up to **50 recent public uploads**.
@@ -65,13 +90,18 @@ Use `http://localhost:3000` for local testing, and add that origin to OAuth sett
 4. Fetch their public `videos.list` metadata/statistics in one batch.
 5. Compute only labeled, reproducible summaries from actual available fields.
 
-This avoids the 100-unit `search.list` call previously used to enumerate videos. Sample coverage depends on video privacy/deletion, API limits and available metrics. The charts do not claim to be complete channel history. Data may be served with a short-lived CDN cache, so counts are current snapshots, **not live Studio telemetry**.
+This avoids use of `search.list` to enumerate videos (quota costs and daily allowances must be checked against current YouTube documentation). Sample coverage depends on video privacy/deletion, API limits and available metrics. The charts do not claim to be complete channel history. Data may be served with a short-lived CDN cache, so counts are current snapshots, **not live Studio telemetry**.
 
 ## Source structure
 
 ```
 TubeIQ/
-├── index.html       # UI, charts, client-side statistics from API responses
+├── index.html       # Dashboard, charts and client-side statistics
+├── premium.css      # Shared premium visual design
+├── studio.html      # Channel-aware Excel title review workspace
+├── studio.css       # Studio responsive layout
+├── studio.js        # Excel processing, public channel research, AI reviews and export
+├── legal.css        # Matching Privacy and Terms design
 ├── api/
 │   ├── youtube.js   # Restricted, read-only YouTube gateway (server-side key)
 │   └── gemini.js    # Gemini editorial/chat endpoint (server-side key)
