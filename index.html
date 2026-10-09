@@ -760,7 +760,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 </div>
 
 <!-- CHATBOT FAB -->
-<button class="chat-fab" id="chatFab" onclick="toggleChat()">
+<button class="chat-fab" id="chatFab" aria-label="Open TubeIQ AI chat" onclick="toggleChat()">
   🤖<div class="chat-notif">AI</div>
 </button>
 
@@ -772,7 +772,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
       <h4>TubeIQ AI ADVISOR</h4>
       <p id="chatStatusLine" style="font-family:DM Mono,monospace;font-size:10px;color:var(--green);letter-spacing:1px">● AI SUGGESTIONS · NOT ANALYTICS METRICS</p>
     </div>
-    <button class="chat-close" onclick="toggleChat()">✕</button>
+    <button class="chat-close" aria-label="Close AI chat" onclick="toggleChat()">✕</button>
   </div>
   <div class="chat-msgs" id="chatMsgs"></div>
   <div class="chat-suggestions" id="chatSuggestions"></div>
@@ -780,14 +780,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
     <textarea class="chat-input" id="chatInput" placeholder="Ask about your channel…" rows="1"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"
       oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
-    <button class="chat-send" id="chatSendBtn" onclick="sendChat()">➤</button>
+    <button class="chat-send" id="chatSendBtn" aria-label="Send chat message" onclick="sendChat()">➤</button>
   </div>
 </div>
 
 <!-- GOOGLE LOGIN MODAL -->
 <div class="modal-overlay" id="loginModal">
   <div class="modal-box">
-    <button class="modal-close" onclick="closeLoginModal()">✕</button>
+    <button class="modal-close" aria-label="Close Google sign-in" onclick="closeLoginModal()">✕</button>
 
     <!-- STATE 1: Initial sign-in prompt -->
     <div id="ls1">
@@ -1120,6 +1120,7 @@ function demoLoad(id){document.getElementById('channelInput').value=id;startAnal
 async function startAnalysis(){
   const input=document.getElementById('channelInput').value.trim();
   if(!input){document.getElementById('channelInput').focus();return;}
+  if(input.length>250){showAlert('Channel lookup is too long.');return;}
   showLoading();
   try{
     const channelId=await resolveChannelId(input);
@@ -1137,6 +1138,7 @@ async function startAnalysis(){
 
 
 function showLoading(){
+  document.getElementById('healthPanel').classList.remove('show');
   document.getElementById('hero').style.display='none';
   document.getElementById('dashboard').style.display='none';
   document.getElementById('loading').style.display='flex';
@@ -1146,6 +1148,7 @@ function hideLoading(){document.getElementById('loading').style.display='none'}
 function goBack(){
   Object.values(charts).forEach(c=>c.destroy());charts={};channelContext=null;isOwnChannel=false;
   document.getElementById('dashboard').style.display='none';
+  document.getElementById('healthPanel').classList.remove('show');
   document.getElementById('hero').style.display='flex';
   document.getElementById('channelInput').value='';
   document.getElementById('chatFab').classList.remove('visible');
