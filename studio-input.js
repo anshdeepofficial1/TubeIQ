@@ -48,8 +48,8 @@ function stageTextMatrix(matrix,label){
   state.book=null;state.bytes=null;state.sheetName='Text plan';
   state.filename=label;state.header=header;
   state.sourceRows=raw.map(row=>row.map(value=>String(value??'')));
-  state.rows=[];state.activeId=null;
-  mapColumns();
+  state.rows=[];state.activeId=null;state.mapping=null;
+  mapColumns();$('importReviewPanel').hidden=false;
   $('columnMapping').hidden=false;$('fileSummary').hidden=false;
   $('fileSummary').textContent='✓ '+label+' • '+raw.length+' entries extracted. Check the date, old title and new title columns.';
   $('columnMapping').scrollIntoView({behavior:'smooth',block:'nearest'});
@@ -121,8 +121,8 @@ function ensureManualColumns(){
   for(const [field,label] of [['date','Manual Date'],['old','Manual Original Title'],['new','Manual New Title'],['notes','Manual Notes']]){
     if(state.mapping[field]<0){
       state.mapping[field]=state.header.length;state.header.push(label);
-      state.sourceRows.forEach(row=>row.push(''));
-      state.rows.forEach(row=>row.sourceCells.push(''));
+      const allSourceCells=new Set([...state.sourceRows,...state.rows.map(row=>row.sourceCells)]);
+      allSourceCells.forEach(row=>row.push(''));
     }
   }
 }
