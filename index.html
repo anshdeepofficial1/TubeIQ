@@ -1154,44 +1154,51 @@ function renderDashboard(data){
    CHARTS
    ════════════════════════════════ */
 function renderCharts(d){
-  var palette=getThemePalette();
-  Chart.defaults.color=palette.secondaryTextColor;Chart.defaults.font.family="'DM Mono',monospace";
-  const lc=document.getElementById('lineChart').getContext('2d');
-  const gv=lc.createLinearGradient(0,0,0,260);gv.addColorStop(0,'rgba(255,45,45,0.25)');gv.addColorStop(1,'rgba(255,45,45,0)');
-  const gl=lc.createLinearGradient(0,0,0,260);gl.addColorStop(0,'rgba(0,212,255,0.2)');gl.addColorStop(1,'rgba(0,212,255,0)');
-  charts.line=new Chart(lc,{type:'line',data:{labels:d.labels,datasets:[
-    {label:'Engagement Rate %',data:d.engagementData,borderColor:'#ff2d2d',backgroundColor:gv,borderWidth:2,pointRadius:3,pointBackgroundColor:'#ff2d2d',tension:.4,fill:true,yAxisID:'y'},
-    {label:'Videos Uploaded',data:d.videosData,borderColor:'#00d4ff',backgroundColor:gl,borderWidth:2,pointRadius:3,pointBackgroundColor:'#00d4ff',tension:.4,fill:true,yAxisID:'y1'},
-  ]},options:{responsive:true,interaction:{mode:'index',intersect:false},
-    plugins:{legend:{position:'top',labels:{boxWidth:8,pointStyle:'circle',usePointStyle:true}}},
-    scales:{x:{grid:{color:palette.gridLineColor},border:{color:palette.strongGridLineColor}},
-      y:{position:'left',grid:{color:palette.gridLineColor},title:{display:true,text:'Engagement %'},ticks:{callback:v=>v+'%'}},
-      y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Videos'},ticks:{callback:v=>fmtNum(v)}}}}});
-  const rc=document.getElementById('radarChart').getContext('2d');
-  charts.radar=new Chart(rc,{type:'radar',data:{labels:['Engagement','Consistency','SEO','Thumbnails','Retention','Growth'],
-    datasets:[{data:d.radarScores,borderColor:'#ff2d2d',backgroundColor:'rgba(255,45,45,0.12)',borderWidth:2,pointBackgroundColor:'#ff2d2d',pointRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-      scales:{r:{angleLines:{color:palette.strongGridLineColor},grid:{color:palette.strongGridLineColor},
-        pointLabels:{font:{size:10},color:palette.secondaryTextColor},ticks:{display:false},min:0,max:100,backgroundColor:palette.gridLineColor}}}});
-  const dc=document.getElementById('donutChart').getContext('2d');
-  charts.donut=new Chart(dc,{type:'doughnut',data:{labels:Object.keys(d.contentMix),datasets:[{
-    data:Object.values(d.contentMix),backgroundColor:['#ff2d2d','#00d4ff','#00e5a0','#f5c842','#7c2cf0'],borderColor:palette.panelBackgroundColor,borderWidth:3,hoverOffset:6}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
-      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,pointStyle:'circle',usePointStyle:true,font:{size:11}}}}}});
+  if(typeof Chart==='undefined'){showAlert('Charts unavailable; numeric data and CSV export remain available.');return;}
+  const palette=getThemePalette();
+  Chart.defaults.color=palette.secondaryTextColor;
+  Chart.defaults.font.family="'DM Mono',monospace";
+  charts.line=new Chart(document.getElementById('lineChart'),{
+    type:'line',data:{labels:d.labels,datasets:[
+      {label:'Avg public likes / views %',data:d.engagementData,borderColor:'#ff2d2d',
+        backgroundColor:'rgba(255,45,45,0.12)',borderWidth:2,pointRadius:3,tension:.25,yAxisID:'y',spanGaps:false},
+      {label:'Uploads in sample',data:d.videosData,borderColor:'#00d4ff',
+        backgroundColor:'rgba(0,212,255,0.08)',borderWidth:2,pointRadius:3,tension:.25,yAxisID:'y1'}
+    ]},options:{responsive:true,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'top',labels:{boxWidth:9}}},
+      scales:{x:{grid:{color:palette.gridLineColor}},
+        y:{position:'left',grid:{color:palette.gridLineColor},title:{display:true,text:'Likes / views %'},ticks:{callback:v=>v+'%'}},
+        y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'Sample uploads'},ticks:{precision:0}}}}});
+  charts.radar=new Chart(document.getElementById('radarChart'),{
+    type:'bar',data:{labels:['Views','Likes','Comments'],datasets:[{
+      label:'Average per sampled public video',
+      data:[d.sampleMetrics.avgViews,d.sampleMetrics.avgLikes,d.sampleMetrics.avgComments],
+      backgroundColor:['#ff2d2d','#00d4ff','#00e5a0'],borderRadius:5
+    }]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},
+      scales:{x:{beginAtZero:true,grid:{color:palette.gridLineColor},ticks:{callback:v=>fmtNum(v)}},
+        y:{grid:{display:false}}}}});
+  charts.donut=new Chart(document.getElementById('donutChart'),{
+    type:'doughnut',data:{labels:Object.keys(d.contentMix),datasets:[{
+      data:Object.values(d.contentMix),backgroundColor:['#ff2d2d','#00d4ff','#00e5a0','#f5c842','#7c2cf0'],
+      borderColor:palette.panelBackgroundColor,borderWidth:3,hoverOffset:6
+    }]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',
+      plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:12,pointStyle:'circle',usePointStyle:true,font:{size:10}}}}}});
 }
 function exportPowerBIData(){
-  if(!channelContext){showAlert('Analyze a channel first.');return}
+  if(!channelContext){showAlert('Analyze a channel first.');return;}
   const d=channelContext;
-  const rows=(d.labels||[]).map(function(lbl,i){
-    return [lbl,d.engagementData?.[i]??0,d.videosData?.[i]??0,d.viewsData?.[i]??0,d.likesData?.[i]??0].join(',');
-  });
-  const csv=['month,engagement_rate_percent,videos_uploaded,views,likes'].concat(rows).join('\n');
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=(d.name||'channel').replace(/[^\w-]+/g,'_')+'_powerbi_metrics.csv';
-  announceStatus('Downloading '+a.download+' for Power BI.');
-  document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  const cell=v=>v===null||v===undefined?'':String(v);
+  const rows=d.labels.map((month,i)=>[month,d.videosData[i],cell(d.engagementData[i]),
+    d.viewsData[i],cell(d.likesData[i])].join(','));
+  const context='# Last '+d.rawVideos.length+' public uploads, fetched '+d.observedAt+
+    '; views/likes are CURRENT video counts GROUPED by upload month, not historical monthly channel statistics.';
+  const csv=[context,'upload_month,sampled_uploads,avg_likes_to_views_percent,video_views_current,video_likes_current_if_all_available'].concat(rows).join('\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
+  const link=document.createElement('a');
+  link.href=url;link.download=(d.name||'channel').replace(/[^\w-]+/g,'_')+'_sample_snapshot.csv';
+  document.body.appendChild(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  announceStatus('Downloading '+link.download);
 }
 
 /* ════════════════════════════════
