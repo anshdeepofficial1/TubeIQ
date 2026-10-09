@@ -24,10 +24,14 @@ export default async function handler(req,res) {
   if (instruction!==undefined && (typeof instruction!=='string' || instruction.length>12000))
     return fail(res,400,'Invalid AI instructions');
   const tokens=Math.min(3000,Math.max(100,Number(body.generationConfig?.maxOutputTokens)||800));
+  const jsonMode=body.generationConfig?.responseMimeType==='application/json';
+  if(body.generationConfig?.responseMimeType && !jsonMode) return fail(res,400,'Unsupported AI response format');
   const payload={contents,generationConfig:{maxOutputTokens:tokens}};
+  if(jsonMode){payload.generationConfig.responseMimeType='application/json';payload.generationConfig.temperature=0.2;}
   if(instruction)payload.systemInstruction={parts:[{text:instruction}]};
   const model=process.env.GEMINI_MODEL || 'gemini-2.5-flash';
   if(!/^gemini-[A-Za-z0-9.-]+$/.test(model))return fail(res,500,'Invalid GEMINI_MODEL configuration');
+  if(jsonMode && /^gemini-2\.5-flash(?:-|$)/.test(model))payload.generationConfig.thinkingConfig={thinkingBudget:0};
   try{
     const upstream=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent',{
       method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':process.env.GEMINI_API_KEY},
