@@ -6,6 +6,7 @@
   <title>TubeIQ Privacy Policy</title>
   <meta name="description" content="Read TubeIQ's Privacy Policy to understand how Google and YouTube data is accessed, used, and protected.">
   <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://ytengine.vercel.app/privacy">
   <meta property="og:type" content="article">
   <meta property="og:title" content="TubeIQ Privacy Policy">
   <meta property="og:description" content="Learn how TubeIQ handles Google and YouTube data under our Privacy Policy.">
@@ -58,7 +59,7 @@
     <section class="card">
       <div class="eyebrow">LEGAL · PRIVACY</div>
       <h1>Privacy Policy</h1>
-      <p class="updated"><strong>Last updated:</strong> April 18, 2026</p>
+      <p class="updated"><strong>Last updated:</strong> October 9, 2026</p>
 
       <p>TubeIQ provides YouTube channel analytics and insights. This Privacy Policy explains what data we access and how we use it.</p>
 
@@ -68,23 +69,25 @@
       <p>TubeIQ does <strong>not</strong> create, edit, upload, delete, or otherwise modify your YouTube content.</p>
 
       <h2>Data Sharing</h2>
-      <p>TubeIQ does <strong>not sell</strong>, rent, or share Google User Data with third parties.</p>
-      <p>Google User Data is used only to provide the core TubeIQ features requested by you.</p>
+      <p>TubeIQ does <strong>not sell</strong> or rent Google User Data. Public channel metadata and prompts that you submit to the optional Gemini assistant are sent to Google Gemini to generate AI suggestions. Do not submit confidential information to chat.</p>
+      <p>When you sign in, Google Identity Services and the YouTube Data API process your authentication and read-only channel access. Vercel hosts the site's backend API routes. TubeIQ does not request permission to modify your channel.</p>
 
       <h2>Data Retention</h2>
-      <p>TubeIQ only retains data as needed to operate the service. You can stop data access at any time by revoking TubeIQ access in your Google account permissions.</p>
+      <p>The current open-source application does not configure its own persistent analytics database. Its dashboard state and OAuth access token are held in browser memory while the page is open. Public API responses can be temporarily cached by the hosting infrastructure. Hosting and API providers may process request logs under their own policies.</p>
+      <p>To revoke read-only YouTube authorization, remove TubeIQ's access in your Google Account's third-party connections and sign out from the app.</p>
 
       <h2>Security</h2>
       <p>We apply reasonable safeguards to protect data processed by TubeIQ. No method of transmission or storage is 100% secure.</p>
 
       <h2>Third-Party Services</h2>
-      <p>TubeIQ uses Google services and APIs. Your use is also subject to applicable Google policies and terms.</p>
+      <p>TubeIQ uses Google Identity Services, YouTube Data API, and optional Google Gemini API. The application is deployed using Vercel. Your use of these services is also subject to their respective policies and terms.</p>
+      <p>Public YouTube counts may be rounded, delayed, hidden, or omitted by the API. TubeIQ does not infer private Studio measures such as revenue, CTR, watch time or retention.</p>
 
       <h2>Changes to This Policy</h2>
       <p>We may update this Privacy Policy from time to time. Updates will be posted on this page with a revised date.</p>
 
       <h2>Contact</h2>
-      <p>For privacy questions, contact the TubeIQ project maintainer.</p>
+      <p>For privacy questions, contact the project maintainer via <a href="https://github.com/anshdeepofficial1/TubeIQ/issues">GitHub Issues</a>. Do not post private credentials in public issues.</p>
     </section>
   </main>
   <footer>TubeIQ · Privacy Policy</footer>
