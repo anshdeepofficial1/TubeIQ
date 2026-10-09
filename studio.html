@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="/studio.css">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" defer></script>
 <script src="/studio.js" defer></script>
+<script src="/studio-input.js" defer></script>
 </head>
 <body class="studio-body">
 <aside class="studio-sidebar" aria-label="Studio navigation">
@@ -75,7 +76,7 @@
 <div class="studio-panel studio-file-panel">
 <div class="studio-dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload optional Excel or CSV"><div class="studio-upload-symbol">↥</div><h3>Drop your spreadsheet here</h3><p>Maximum 5 MB • Up to 150 rows</p><button class="studio-btn studio-btn-outline" type="button" id="selectFile">Browse files →</button><input id="fileInput" type="file" accept=".xlsx,.xls,.csv" hidden></div>
 </div></details>
-<div class="studio-panel studio-import-review">
+<div class="studio-panel studio-import-review" id="importReviewPanel" hidden>
 <div id="fileSummary" class="studio-file-summary" hidden></div>
 <div id="columnMapping" class="studio-mapping" hidden><div class="studio-mapping-head"><h3>Confirm the imported columns</h3><p>Check how we interpreted your message, copied table or uploaded spreadsheet before importing.</p></div><div class="studio-mapping-grid">
 <label>Date<select id="colDate"></select></label><label>Old / Original Title (optional)<select id="colOld"></select></label><label>Your New Title / Topic<select id="colNew"></select></label><label>Content Notes (optional)<select id="colNotes"></select></label></div>
