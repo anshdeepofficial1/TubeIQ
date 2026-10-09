@@ -326,7 +326,7 @@ async function reviewBatch(batch,controller){
   revisedTitle:r.userTitle.slice(0,170),notes:r.notes.slice(0,500),spreadsheetIssues:r.issues}));
  const request={system_instruction:{parts:[{text:system}]},
   contents:[{role:'user',parts:[{text:JSON.stringify({channelPublicData:current,competitorPublicData:competitor,rows})}]}],
-  generationConfig:{maxOutputTokens:3000}};
+  generationConfig:{maxOutputTokens:3000,responseMimeType:'application/json'}};
  const response=await fetch('/api/gemini',{method:'POST',headers:{'Content-Type':'application/json'},
   body:JSON.stringify(request),signal:controller.signal});
  let payload;try{payload=await response.json()}catch{throw new Error('AI service returned invalid JSON.')}
