@@ -67,8 +67,8 @@ function refresh(){
  $('applyMapping').disabled=state.running;
  $('reviewFilters').hidden=!rows.length;
  $('sheetLabel').textContent=rows.length?(state.filename+' • '+rows.length+' entries'):'No calendar imported';
- $('reviewProgressLabel').textContent=rows.length?(reviewed+' reviewed / '+rows.length+' entries • '+rows.filter(r=>r.approved).length+' approved'):'Upload a file to begin reviewing your work.';
- if(rows.length && !state.channel && !state.running)notice('Connect the channel you want to grow before requesting AI review. Spreadsheet-only checks are available in each row.',true);
+ $('reviewProgressLabel').textContent=rows.length?(reviewed+' reviewed / '+rows.length+' entries • '+rows.filter(r=>r.approved).length+' approved'):'Write, paste or upload a content plan to begin.';
+ if(rows.length && !state.channel && !state.running)notice('Your calendar is ready. Connect your channel for evidence-led AI reviews; you can still edit and approve entries now.',true);
  if(rows.length && state.channel && !state.running && reviewed===0)notice('Ready to review against '+state.channel.name+' and '+state.channel.recent.length+' sampled real uploads. Titles and notes are sent to Google Gemini only when you click Review all.');
  if(rows.length && reviewed===rows.length && !state.running)notice('AI review finished. Open each row to inspect evidence and approve your chosen final title.');
  renderRows();
@@ -82,14 +82,18 @@ function findColumn(header,type){
  };
  for(const rule of choices[type]){const index=header.findIndex(v=>rule.test(String(v||'').trim()));if(index>=0)return index}
  if(type==='date')return -1;
- if(type==='old')return header.length>1?1:-1;
- if(type==='new')return header.length>2?2:-1;
+ if(type==='old')return -1;
+ if(type==='new'){
+  const generic=header.findIndex(v=>/^(?:title|topic|video title|content idea|video|name|heading|विषय|शीर्षक|ਟਾਈਟਲ|ਸਿਰਲੇਖ)$/iu.test(String(v||'').trim()));
+  if(generic>=0)return generic;
+  return header.length===1?0:header.length>=3?2:header.length===2?1:-1;
+ }
  return -1;
 }
 function mapColumns(){
  const types=[['colDate','date'],['colOld','old'],['colNew','new'],['colNotes','notes']];
  for(const [id,type] of types){
-  const s=$(id);s.replaceChildren(el('option',{value:'-1'},type==='notes'?'Not available':'Choose a column'));
+  const s=$(id);s.replaceChildren(el('option',{value:'-1'},type==='notes'?'Not available':type==='old'?'No original title':type==='date'?'Date not supplied':'Choose a column'));
   state.header.forEach((v,i)=>s.append(el('option',{value:String(i)},(i+1)+'. '+String(v||'Column '+(i+1)).slice(0,90))));
   s.value=String(findColumn(state.header,type));
  }
@@ -146,17 +150,17 @@ async function importFile(file){
 }
 function applyMapping(){
  const mapping={date:Number($('colDate').value),old:Number($('colOld').value),new:Number($('colNew').value),notes:Number($('colNotes').value)};
- if(mapping.old<0||mapping.new<0||mapping.old===mapping.new){toast('Select different Old Title and Your New Title columns.');return}
+ if(mapping.old<0&&mapping.new<0){toast('Select at least one title/topic column.');return}
+ if(mapping.old>=0&&mapping.old===mapping.new){toast('Old and new title cannot use the same column.');return}
  if(mapping.date>=0&&(mapping.date===mapping.old||mapping.date===mapping.new)){toast('Date must have its own column.');return}
  state.rows=state.sourceRows.map((cells,index)=>{
   const textAt=i=>i<0?'':String(cells[i]||'').trim();
   const r={id:index+1,sourceCells:cells,date:textAt(mapping.date),oldTitle:textAt(mapping.old),userTitle:textAt(mapping.new),notes:textAt(mapping.notes),
    issues:[],review:null,approved:false,finalTitle:'',selection:''};
-  if(!r.oldTitle)r.issues.push('Original title is missing.');
-  if(!r.userTitle)r.issues.push('Your revised title is missing.');
+  if(!r.oldTitle&&!r.userTitle&&!r.notes)r.issues.push('No title or topic provided.');
   if(r.userTitle.length>100)r.issues.push('Your new title exceeds the 100-character YouTube title limit.');
   if(r.oldTitle&&r.userTitle&&normalize(r.oldTitle)===normalize(r.userTitle))r.issues.push('Revised title has no material wording change (this may be fine).');
-  if(!r.date)r.issues.push('Publish date is missing.');
+  if(!r.date)r.issues.push('Publishing date not supplied (optional).');
   return r;
  });
  const counts=new Map(),dates=new Map();
@@ -172,7 +176,7 @@ function applyMapping(){
  });
  state.mapping=mapping;
  $('columnMapping').hidden=true;$('reviewCard').scrollIntoView({behavior:'smooth',block:'start'});
- refresh();toast(state.rows.length+' content entries ready. Original spreadsheet cells preserved.');
+ refresh();toast(state.rows.length+' content entries ready. The original information is preserved.');
 }
 function renderRows(){
  const rows=state.rows.filter(r=>{
