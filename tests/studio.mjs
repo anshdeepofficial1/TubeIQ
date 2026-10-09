@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {execFileSync} from 'node:child_process';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-const html=read('studio.html'),js=read('studio.js'),css=read('studio.css');
+const html=read('studio.html'),js=read('studio.js'),css=read('studio.css'),inputCode=read('studio-input.js');
 execFileSync(process.execPath,['--check',new URL('../studio.js',import.meta.url).pathname]);
+execFileSync(process.execPath,['--check',new URL('../studio-input.js',import.meta.url).pathname]);
 const source=(from,to,symbol)=>{
  const a=js.indexOf(from),b=js.indexOf(to,a+from.length);
  assert(a>=0&&b>=0,'Missing '+symbol+' source segment');
@@ -30,7 +31,27 @@ assert.equal(ai('```json\n{"reviews":[]}\n```').length,0);
 assert.throws(()=>ai('invalid'),/parseable review JSON/);
 assert.equal(safeCsv('=HYPERLINK(1)'), '"\'=HYPERLINK(1)"');
 assert.equal(safeCsv('one"two'),'"one""two"');
-const refs=[...js.matchAll(/\$\('([A-Za-z0-9]+)'\)/g)].map(m=>m[1]);
+// Test the new text-first composer with real examples from creators.
+const adapterPart=inputCode.slice(inputCode.indexOf('function looksLikeColumnHeaders('),inputCode.indexOf('function stageTextMatrix('));
+const csvPart=js.slice(js.indexOf('function parseCsv('),js.indexOf('async function importFile('));
+const parseText=new Function(csvPart+'\n'+adapterPart+'\nreturn parsePastedTable')();
+const plainTable='| Date | Old Title | New Title |\n| --- | --- | --- |\n| 10 Oct 2026 | Guru Ki Bani | Guru Ki Bani Suno |';
+assert.equal(parseText(plainTable)[1][2],'Guru Ki Bani Suno');
+assert.equal(parseText('Date\tOld Title\tNew Title\n2026-10-09\tOriginal\tRewritten')[1][2],'Rewritten');
+assert.equal(parseText('Date,Old Title,New Title\n2026-10-09,Original,Rewritten')[1][1],'Original');
+assert.equal(parseText('10 Oct 2026: Gurbani Shabad\n11 Oct 2026 — Another Shabad')[2][1],'Another Shabad');
+assert.equal(parseText('- Punjabi Shabad\n- Bhagat Ravidas Ji')[2][0],'Bhagat Ravidas Ji');
+assert.equal(parseText('Bhagat Ravidas Ji de bachan')[1][0],'Bhagat Ravidas Ji de bachan');
+assert.equal(parseText('I have a Gurbani recording for next month, please suggest a title.'),null,
+ 'Conversational user messages should use explicit AI extraction, not be misread as titles.');
+const validateExtracted=new Function(inputCode.slice(inputCode.indexOf('function validateExtractedEntries('),
+ inputCode.indexOf('async function extractMessageAI('))+'\nreturn validateExtractedEntries')();
+assert.deepEqual(validateExtracted({entries:[{newTitle:'Shabad',date:''}]}).map(e=>e.date),['']);
+assert.throws(()=>validateExtracted({entries:[]}),/No recognizable/);
+assert(html.includes('studio-input.js')&&html.includes('planMessage')&&html.includes('extractTextAI'),'Text-first entry UI missing');
+assert(html.includes('manualNew')&&html.includes('fileToggle'),'Manual entry and optional file upload must remain');
+const adapterRefs=[...inputCode.matchAll(/\\$\\('([A-Za-z0-9]+)'\\)/g)].map(m=>m[1]);
+const refs=[...js.matchAll(/\$\('([A-Za-z0-9]+)'\)/g)].map(m=>m[1]).concat(adapterRefs);
 const ids=[...html.matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
 const dynamicIds=new Set(['finalTitleInput']);
 assert.deepEqual([...new Set(refs)].filter(id=>!ids.includes(id)&&!dynamicIds.has(id)),[]);
@@ -41,4 +62,4 @@ assert(css.includes('@media(max-width:760px)'),'Mobile responsive layout missing
 assert(js.includes('responseMimeType:\'application/json\''),'AI structured output missing');
 assert(js.includes('snapshotToPublic('),'Real public YouTube facts missing');
 assert(!/AIza[0-9A-Za-z_-]{20,}/.test(js),'API secret in browser source');
-console.log('Content Studio checks passed: JS syntax, CSV edge cases, bilingual mapping, AI JSON, safe export, channel input, assets and DOM references.');
+console.log('Content Studio checks passed: JS syntax, CSV/Markdown/TSV/date-list import, natural-message detection, Punjabi mapping, AI JSON, input modes, safe export and DOM references.');
