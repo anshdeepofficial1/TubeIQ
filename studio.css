@@ -197,3 +197,17 @@
 @media(max-width:420px){.studio-mapping-grid{grid-template-columns:1fr}.studio-breadcrumb{font-size:9px}
  .studio-intro h1{font-size:30px}.studio-trust span{font-size:10px}
  .studio-btn{font-size:10px;padding:11px}}
+
+/* Honest side-by-side competitor comparison; no invented growth scoring. */
+.studio-competition[hidden]{display:none!important}
+.studio-competition{margin-top:16px;border:1px solid rgba(166,148,246,.21);border-radius:16px;padding:23px;background:linear-gradient(125deg,rgba(165,144,248,.075),rgba(117,208,194,.035))}
+.studio-competition-head{display:flex;justify-content:space-between;gap:15px;align-items:end;margin-bottom:18px}
+.studio-competition-head h3{font:800 17px 'Manrope',sans-serif;letter-spacing:-.5px}
+.studio-competition-head>span{font-size:10px;color:#95a0b8;font-weight:700}
+.studio-competition-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.studio-competition-metric{border:1px solid rgba(202,213,245,.085);border-radius:11px;padding:13px;background:#151d2b}
+.studio-competition-metric>span{font-size:10px;color:#9eabc1}
+.studio-competition-metric>span>div{display:flex;justify-content:space-between;gap:10px;margin-top:10px}
+.studio-competition-metric strong{font-size:13px;font-weight:800;color:#c5b6ff}
+.studio-competition-metric strong+strong{color:#80ddcf}
+.studio-competition>p{font-size:10px;line-height:1.7;color:#8392a9;margin-top:15px}
