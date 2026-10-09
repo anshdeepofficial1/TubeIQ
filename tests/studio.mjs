@@ -56,6 +56,19 @@ const ids=[...html.matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
 const dynamicIds=new Set(['finalTitleInput']);
 assert.deepEqual([...new Set(refs)].filter(id=>!ids.includes(id)&&!dynamicIds.has(id)),[]);
 assert.equal(ids.length,new Set(ids).size,'Duplicated studio HTML IDs');
+
+// Validate actual HTML container nesting, not just the number of opened and closed tags.
+const htmlWithoutComments=html.replace(/<!--[\s\S]*?-->/g,'').replace(/<script[\s\S]*?<\/script>/g,'');
+const stack=[];
+const voidElements=new Set(['meta','link','img','input','br','hr','source','area','base']);
+for(const match of htmlWithoutComments.matchAll(/<\/?([a-zA-Z][\w:-]*)\b[^>]*>/g)){
+ const name=match[1].toLowerCase();
+ if(voidElements.has(name)||match[0].endsWith('/>'))continue;
+ if(match[0].startsWith('</'))assert.equal(stack.pop(),name,'Mismatched closing tag '+name);
+ else stack.push(name);
+}
+assert.equal(stack.length,0,'Unclosed Studio HTML containers');
+
 assert(html.includes('xlsx-0.20.3/package/dist/xlsx.full.min.js'),'Versioned official Excel parser missing');
 assert(html.includes('studio.js')&&html.includes('studio.css'),'Studio assets not loaded');
 assert(css.includes('@media(max-width:760px)'),'Mobile responsive layout missing');
