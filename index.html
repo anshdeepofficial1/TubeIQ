@@ -6,6 +6,8 @@
 <title>TubeIQ — YouTube Channel Intelligence</title>
 <meta name="description" content="TubeIQ is a YouTube channel intelligence platform for creators to analyze channel performance, spot growth patterns, and get AI-powered content recommendations.">
 <meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://ytengine.vercel.app/">
+<meta property="og:url" content="https://ytengine.vercel.app/">
 <meta name="theme-color" content="#070b14">
 <meta property="og:type" content="website">
 <meta property="og:title" content="TubeIQ — YouTube Channel Intelligence">
@@ -22,6 +24,7 @@
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "TubeIQ",
+  "url": "https://ytengine.vercel.app/",
   "applicationCategory": "BusinessApplication",
   "description": "TubeIQ helps creators analyze YouTube channels and discover growth opportunities with analytics and AI-assisted recommendations.",
   "operatingSystem": "Web",
@@ -406,9 +409,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .health-item.warn .health-label{color:var(--gold)}
 .health-item.ok .health-label{color:var(--green)}
 .health-msg{font-size:13px;color:var(--text2);line-height:1.5}
-.health-fix{font-family:'DM Mono',monospace;font-size:11px;margin-top:6px;cursor:pointer;transition:color .2s}
+.health-fix{font-family:'DM Mono',monospace;font-size:11px;margin-top:6px;line-height:1.5}
 .health-item.err .health-fix{color:var(--red)} .health-item.warn .health-fix{color:var(--gold)}
-.health-fix:hover{text-decoration:underline}
+
 
 /* COMPARE MODAL */
 .cmp-overlay{display:none;position:fixed;inset:0;z-index:400;
@@ -486,6 +489,45 @@ footer a:hover{text-decoration:underline}
 .footer-brand{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px}
 .footer-brand img{width:24px;height:24px;object-fit:contain;border-radius:6px}
 .footer-brand strong{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1.5px;color:var(--text)}
+
+/* Responsive layouts, keyboard focus, and reduced motion */
+@media(max-width:740px){
+  .nav-badge{display:none}
+  .hero-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 16px;width:100%;margin-top:40px}
+  .hero-stat .num{font-size:29px}
+  .hero-stat .lbl{font-size:9px;letter-spacing:1px}
+  .cmp-search{padding:16px;flex-direction:column}
+  .cmp-radar-wrap{grid-template-columns:1fr}
+  .cmp-head,.cmp-body{padding:18px}
+  .cmp-box{margin:auto}
+  .cmp-overlay{align-items:flex-start;padding:12px}
+  .cmp-input{width:100%;min-width:0}
+  .dash-header{flex-direction:column}
+  .dash-actions{flex-direction:row;justify-content:flex-start}
+  .channel-identity{min-width:0;width:100%}
+  .channel-meta{min-width:0;overflow-wrap:anywhere}
+  .panel{padding:19px}
+}
+@media(max-width:480px){
+  .search-inner{flex-direction:column}
+  .search-inner input{min-width:0}
+  .btn-analyze{width:100%}
+  .nav-right{gap:5px}
+  .nav-login-btn{padding:8px 10px;font-size:12px}
+  .nav-user-pill{max-width:130px;overflow:hidden;padding:6px}
+  #dashboard{padding-left:14px;padding-right:14px}
+  .kpi-grid{grid-template-columns:1fr}
+  .hero-title{font-size:clamp(50px,14vw,76px)}
+  .hero-divider span{font-size:9px;letter-spacing:1px}
+  .btn-google-login{flex-wrap:wrap}
+  .health-grid{grid-template-columns:1fr}
+}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--cyan);outline-offset:3px
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
 </style>
 </head>
 <body>
@@ -623,7 +665,7 @@ footer a:hover{text-decoration:underline}
   <div id="recPanel">
     <div class="panel">
       <div class="panel-title">🎬 VIDEO RECOMMENDATION ENGINE</div>
-      <div class="panel-sub">TELL US YOUR NEXT CONTENT IDEA → GET FULLY OPTIMIZED VIDEO PACKAGE</div>
+      <div class="panel-sub">YOUR NEXT CONTENT IDEA → EDITABLE AI DRAFTS, NOT PERFORMANCE FORECASTS</div>
       <div class="rec-wizard">
         <div class="rec-wizard-title">WHAT ARE YOU PLANNING TO POST NEXT?</div>
         <p>Describe your content idea and we'll generate editable title, description, tags and thumbnail-text drafts informed by your recent public uploads. These are suggestions, not verified forecasts.</p>
@@ -684,7 +726,7 @@ footer a:hover{text-decoration:underline}
 <div id="healthPanel">
   <div class="panel">
     <div class="panel-title">⚠ CHANNEL HEALTH REPORT</div>
-    <div class="panel-sub" id="healthSub">AUTOMATED AUDIT · OWNER ANALYSIS · SHOWS WHAT TO FIX</div>
+    <div class="panel-sub" id="healthSub">OBSERVATIONAL REPORT · AVAILABLE PUBLIC YOUTUBE API FIELDS</div>
     <div class="health-grid" id="healthGrid"></div>
   </div>
 </div>
@@ -791,7 +833,7 @@ footer a:hover{text-decoration:underline}
     <img src="Logo.png" alt="TubeIQ logo">
     <strong>TubeIQ</strong>
   </div>
-  TubeIQ · YouTube Channel Intelligence · Built with <span>♥</span> using Gemini AI · YouTube Data API v3 · <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> · <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>
+  TubeIQ · Real YouTube Data API v3 snapshots · Optional Gemini AI drafts · <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a> · <a href="/terms" target="_blank" rel="noopener">Terms of Service</a>
 </footer>
 
 <script>
@@ -1357,13 +1399,13 @@ function initChat(data){
   }\n\nWhat would you like to know?`);
   const q=isOwner?[
     'Why is my engagement rate '+data.engRate+'?',
-    'How do I grow faster in '+data.niche+'?',
-    'What title format gets me most views?',
+    'What content ideas fit '+data.niche+'?',
+    'Which title structures appear in recent uploads?',
     'What should I post next week?',
   ]:[
     'What is this channel doing well?',
-    'What niche gaps can I exploit?',
-    'How does this compare to top creators?',
+    'What category patterns appear in recent uploads?',
+    'What can this recent public sample tell us?',
     'What can I learn from their strategy?',
   ];
   document.getElementById('chatSuggestions').innerHTML=q.map(x=>`<div class="chat-chip" onclick="quickChat('${x.replace(/'/g,"\\'")}')">${x}</div>`).join('');
