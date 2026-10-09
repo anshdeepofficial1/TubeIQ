@@ -1,3 +1,4 @@
+import { allowRequest } from '../lib/rate-limit.js';
 // Server-side YouTube Data API gateway. Only fixed read-only operations are exposed.
 const METHODS = {
   channels: { parts: ['id', 'snippet,statistics,contentDetails'], filters: ['id', 'forHandle', 'forUsername'] },
@@ -7,6 +8,7 @@ const METHODS = {
 function bad(res, status, message) { return res.status(status).json({error:{message}}); }
 export default async function handler(req, res) {
   if (req.method !== 'GET') { res.setHeader('Allow','GET'); return bad(res,405,'Method not allowed'); }
+  if (!allowRequest(req, 60)) {res.setHeader('Retry-After','60');return bad(res,429,'Too many requests. Retry shortly.');}
   if (!process.env.YOUTUBE_API_KEY) return bad(res,503,'YouTube API is not configured. Set YOUTUBE_API_KEY in Vercel.');
   const origin = req.headers.origin;
   if (origin) {
@@ -14,7 +16,7 @@ export default async function handler(req, res) {
     catch { return bad(res,403,'Invalid origin'); }
   }
   const {resource, part, ...query} = req.query || {};
-  const rule = METHODS[resource];
+  const rule = Object.hasOwn(METHODS, resource) ? METHODS[resource] : null;
   if (!rule || typeof part !== 'string' || !rule.parts.includes(part)) return bad(res,400,'Unsupported YouTube request');
   const provided = Object.keys(query);
   if (provided.some(k => !rule.filters.includes(k) && !(resource==='playlistItems' && k==='maxResults')))
@@ -26,7 +28,7 @@ export default async function handler(req, res) {
   if (typeof val !== 'string' || val.length > 250 || !val.length) return bad(res,400,'Invalid lookup value');
   if (resource==='channels' && query.id && !/^UC[A-Za-z0-9_-]{22}$/.test(query.id))
     return bad(res,400,'Invalid channel ID');
-  if (resource==='channels' && query.forHandle && !/^@[A-Za-z0-9_.-]{1,30}$/.test(query.forHandle))
+  if (resource==='channels' && query.forHandle && !/^@[\p{L}\p{N}_.-]{1,30}$/u.test(query.forHandle))
     return bad(res,400,'Invalid channel handle');
   if (resource==='videos' && (!/^[A-Za-z0-9_-]{11}(,[A-Za-z0-9_-]{11}){0,49}$/.test(query.id)))
     return bad(res,400,'Invalid video IDs');
