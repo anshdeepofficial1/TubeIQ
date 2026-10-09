@@ -35,10 +35,24 @@ function displayChannel(target,containerId){
   '<div class="studio-channel-meta"><span>Subscribers <b>'+fmt(target.subs)+'</b></span>'+
   '<span>Lifetime views <b>'+fmt(target.views)+'</b></span>'+
   '<span>Uploads sampled <b>'+recent.length+'</b></span>'+
-  '<span>Mean sampled views <b>'+fmt(avg)+'</b></span></div>';
+  '<span>Mean sampled views <b>'+fmt(avg)+'</b></span>'+
+  '<span>Checked <b>'+escapeHtml(String(target.observedAt||'').slice(0,16).replace('T',' '))+' UTC</b></span></div>';
+}
+function renderCompetitorMetrics(){
+ const box=$('competitionInsights');
+ if(!state.channel||!state.competitor){box.hidden=true;return}
+ const a=state.channel,b=state.competitor;
+ const avg=ch=>{const n=ch.recent.map(v=>v.views).filter(x=>x!==null);return n.length?Math.round(n.reduce((x,y)=>x+y,0)/n.length):null};
+ const metrics=[['Public subscribers',a.subs,b.subs],['Lifetime public channel views',a.views,b.views],
+  ['Reported channel videos',a.videoCount,b.videoCount],['Sampled recent public uploads',a.recent.length,b.recent.length],
+  ['Mean views / sampled upload',avg(a),avg(b)]];
+ $('comparisonMetrics').innerHTML=metrics.map(m=>'<div class="studio-competition-metric"><span>'+escapeHtml(m[0])+
+ '<div><strong>'+fmt(m[1])+'</strong><strong>'+fmt(m[2])+'</strong></div></span></div>').join('');
+ box.hidden=false;
 }
 function canReview(){return !!(state.channel && state.rows.length && !state.running)}
 function refresh(){
+ renderCompetitorMetrics();
  const rows=state.rows;const reviewed=rows.filter(r=>r.review && r.review.decision!=='error').length;
  const attention=rows.filter(r=>r.review && ['verify','improve','error'].includes(r.review.decision) && !r.approved).length;
  $('countEntries').textContent=rows.length?String(rows.length):'—';
