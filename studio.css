@@ -308,3 +308,5 @@ body.studio-body{background:var(--studio-canvas);color:var(--studio-ink);font-fa
 .studio-body:has(#reviewRows .studio-row-open) #reviewShell[hidden]{display:block!important}
 .studio-body:has(#reviewRows .studio-row-open) #studioMetrics[hidden]{display:grid!important}
 .studio-body:has(#reviewRows .studio-row-open) #reviewEmpty{display:none!important}
+
+@media(max-width:760px){.studio-section-heading{min-width:0}}
