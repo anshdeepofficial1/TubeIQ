@@ -498,7 +498,7 @@ footer a:hover{text-decoration:underline}
   </a>
   <div class="nav-right">
     <div class="theme-select">NIGHT</div>
-    <div class="nav-badge">REAL-TIME YOUTUBE ANALYTICS</div>
+    <div class="nav-badge">PUBLIC YOUTUBE DATA</div>
     <div class="nav-user-pill" id="navUserPill">
       <img id="navUserImg" src="" alt="">
       <span id="navUserName"></span>
@@ -523,7 +523,7 @@ footer a:hover{text-decoration:underline}
   <div class="hero-glow"></div>
   <div class="hero-eyebrow">🔬 Channel Intelligence Platform</div>
   <h1 class="hero-title">DECODE YOUR<br><span class="accent">YOUTUBE</span><br><span class="accent2">CHANNEL</span></h1>
-  <p class="hero-sub">Enter any YouTube channel ID to unlock deep niche analysis, real performance insights, and AI-powered content recommendations.</p>
+  <p class="hero-sub">Analyze a YouTube channel with the official API. See measured recent uploads and public interactions, then get optional AI-assisted content ideas.</p>
   <div class="search-wrap">
     <div class="search-inner">
       <input type="text" id="channelInput" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx · channel ID or @handle" spellcheck="false"
@@ -539,10 +539,10 @@ footer a:hover{text-decoration:underline}
     <span class="gl-badge">OWNER ONLY</span>
   </button>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="num">94%</div><div class="lbl">Niche Accuracy</div></div>
-    <div class="hero-stat"><div class="num">12K+</div><div class="lbl">Channels Analyzed</div></div>
-    <div class="hero-stat"><div class="num">0.9+</div><div class="lbl">Min Confidence</div></div>
-    <div class="hero-stat"><div class="num">50+</div><div class="lbl">Pattern Insights</div></div>
+    <div class="hero-stat"><div class="num">50</div><div class="lbl">Recent Uploads Max</div></div>
+    <div class="hero-stat"><div class="num">API</div><div class="lbl">Official YouTube Data</div></div>
+    <div class="hero-stat"><div class="num">0</div><div class="lbl">Fabricated Metrics</div></div>
+    <div class="hero-stat"><div class="num">CSV</div><div class="lbl">Exportable Snapshots</div></div>
   </div>
 </section>
 
@@ -552,10 +552,10 @@ footer a:hover{text-decoration:underline}
   <div class="loader-text">ANALYZING CHANNEL</div>
   <div class="loader-steps">
     <div class="step-item" id="s1"><div class="step-dot"></div>Fetching channel data via YouTube API…</div>
-    <div class="step-item" id="s2"><div class="step-dot"></div>Aggregating monthly performance metrics…</div>
-    <div class="step-item" id="s3"><div class="step-dot"></div>Computing content pattern insights…</div>
-    <div class="step-item" id="s4"><div class="step-dot"></div>Classifying channel niche from real categories…</div>
-    <div class="step-item" id="s5"><div class="step-dot"></div>Building AI content analysis…</div>
+    <div class="step-item" id="s2"><div class="step-dot"></div>Reading the recent uploads playlist…</div>
+    <div class="step-item" id="s3"><div class="step-dot"></div>Checking available public video statistics…</div>
+    <div class="step-item" id="s4"><div class="step-dot"></div>Grouping videos by YouTube category…</div>
+    <div class="step-item" id="s5"><div class="step-dot"></div>Preparing charts from actual data…</div>
   </div>
 </div>
 <div id="srStatus" class="sr-only" aria-live="polite"></div>
@@ -581,34 +581,34 @@ footer a:hover{text-decoration:underline}
 
   <div class="grid-3">
     <div class="panel" id="nichePanel">
-      <div class="panel-title">NICHE CLASSIFICATION</div>
-      <div class="panel-sub">REAL CATEGORY ANALYSIS</div>
+      <div class="panel-title">MOST COMMON VIDEO CATEGORY</div>
+      <div class="panel-sub">SAMPLED PUBLIC UPLOADS · CATEGORY PROXY</div>
       <div class="niche-main">
         <div class="niche-icon" id="nicheIcon">🔬</div>
         <div><div class="niche-name" id="nicheName">—</div><div class="niche-conf" id="nicheConf">—</div></div>
       </div>
       <div class="confidence-bar" style="margin-top:20px;">
-        <div class="conf-label"><span>MODEL CONFIDENCE</span><span id="confPct">—</span></div>
+        <div class="conf-label"><span>SHARE OF SAMPLED UPLOADS</span><span id="confPct">—</span></div>
         <div class="bar-track"><div class="bar-fill" id="confBar" style="width:0%"></div></div>
       </div>
       <div class="niche-tags" id="nicheTags"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">CHANNEL METRICS RADAR</div>
-      <div class="panel-sub">NORMALIZED SCORE / 100</div>
+      <div class="panel-title">AVG VIDEO INTERACTIONS</div>
+      <div class="panel-sub">PUBLIC COUNTS PER SAMPLED VIDEO</div>
       <div class="radar-wrap"><canvas id="radarChart" width="220" height="220"></canvas></div>
     </div>
     <div class="panel">
       <div class="panel-title">CONTENT MIX</div>
-      <div class="panel-sub">VIDEO CATEGORY DISTRIBUTION</div>
+      <div class="panel-sub">CATEGORY COUNTS IN RECENT UPLOAD SAMPLE</div>
       <div class="radar-wrap"><canvas id="donutChart" width="220" height="220"></canvas></div>
     </div>
   </div>
 
   <div class="grid-2">
     <div class="panel">
-      <div class="panel-title">ENGAGEMENT OVER TIME</div>
-      <div class="panel-sub">LAST 12 MONTHS · REAL ENGAGEMENT RATE % + VIDEO COUNT</div>
+      <div class="panel-title">UPLOAD-MONTH SNAPSHOT</div>
+      <div class="panel-sub">LAST 50 PUBLIC UPLOADS · CURRENT LIKES/VIEW RATE BY UPLOAD MONTH</div>
       <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
       <button class="btn-powerbi" onclick="exportPowerBIData()">EXPORT THIS CHART FOR POWER BI (CSV)</button>
     </div>
@@ -626,7 +626,7 @@ footer a:hover{text-decoration:underline}
       <div class="panel-sub">TELL US YOUR NEXT CONTENT IDEA → GET FULLY OPTIMIZED VIDEO PACKAGE</div>
       <div class="rec-wizard">
         <div class="rec-wizard-title">WHAT ARE YOU PLANNING TO POST NEXT?</div>
-        <p>Describe your content idea and we'll generate the perfect title, description, tags, thumbnail text, and upload strategy — all tailored to your channel's patterns and audience.</p>
+        <p>Describe your content idea and we'll generate editable title, description, tags and thumbnail-text drafts informed by your recent public uploads. These are suggestions, not verified forecasts.</p>
         <div class="wizard-field">
           <label>Content Idea / Topic *</label>
           <textarea class="wizard-input" id="wizTopicInput" rows="3"
@@ -669,11 +669,11 @@ footer a:hover{text-decoration:underline}
   </div>
 
   <div class="panel">
-    <div class="panel-title">RECENT VIDEO PERFORMANCE</div>
-    <div class="panel-sub">LATEST 8 UPLOADS · REAL DATA</div>
+    <div class="panel-title">RECENT PUBLIC VIDEO PERFORMANCE</div>
+    <div class="panel-sub">LATEST 8 PUBLIC UPLOADS · CURRENT COUNTS</div>
     <div style="overflow-x:auto;">
       <table class="perf-table">
-        <thead><tr><th>TITLE</th><th>VIEWS</th><th>LIKES</th><th>ENG RATE</th><th>STATUS</th></tr></thead>
+        <thead><tr><th>TITLE</th><th>VIEWS</th><th>LIKES</th><th>LIKES / VIEWS</th><th>WATCH</th></tr></thead>
         <tbody id="perfBody"></tbody>
       </table>
     </div>
@@ -701,7 +701,7 @@ footer a:hover{text-decoration:underline}
     <div class="chat-head-avatar">🤖</div>
     <div class="chat-head-info">
       <h4>TubeIQ AI ADVISOR</h4>
-      <p id="chatStatusLine" style="font-family:DM Mono,monospace;font-size:10px;color:var(--green);letter-spacing:1px">● POWERED BY GEMINI AI</p>
+      <p id="chatStatusLine" style="font-family:DM Mono,monospace;font-size:10px;color:var(--green);letter-spacing:1px">● AI SUGGESTIONS · NOT ANALYTICS METRICS</p>
     </div>
     <button class="chat-close" onclick="toggleChat()">✕</button>
   </div>
