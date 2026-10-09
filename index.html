@@ -1260,11 +1260,12 @@ function exportPowerBIData(){
   if(!channelContext){showAlert('Analyze a channel first.');return;}
   const d=channelContext;
   const cell=v=>v===null||v===undefined?'':String(v);
-  const rows=d.labels.map((month,i)=>[month,d.videosData[i],cell(d.engagementData[i]),
-    d.viewsData[i],cell(d.likesData[i])].join(','));
-  const context='# Last '+d.rawVideos.length+' public uploads, fetched '+d.observedAt+
-    '; views/likes are CURRENT video counts GROUPED by upload month, not historical monthly channel statistics.';
-  const csv=[context,'upload_month,sampled_uploads,avg_likes_to_views_percent,video_views_current,video_likes_current_if_all_available'].concat(rows).join('\n');
+  const label='Current video totals grouped by publish month - NOT monthly channel view history';
+  const rows=d.labels.map((month,i)=>[
+    d.observedAt,d.rawVideos.length,month,d.videosData[i],
+    cell(d.engagementData[i]),d.viewsData[i],cell(d.likesData[i]),label
+  ].join(','));
+  const csv=['snapshot_utc,sample_video_count,upload_month,sampled_uploads,avg_public_likes_to_views_percent,current_video_views,current_video_likes_if_complete,data_scope'].concat(rows).join('\n');
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));
   const link=document.createElement('a');
   link.href=url;link.download=(d.name||'channel').replace(/[^\w-]+/g,'_')+'_sample_snapshot.csv';
