@@ -1091,69 +1091,59 @@ function goBack(){
 function renderDashboard(data){
   document.getElementById('dashboard').style.display='block';
   window.scrollTo(0,0);
-
-  // Avatar
   const av=document.getElementById('avatarEl');av.innerHTML='';
   if(data.thumbnailUrl){
     const img=document.createElement('img');img.src=data.thumbnailUrl;img.alt=data.name;
-    img.onerror=()=>{av.innerHTML='<span style="font-family:Bebas Neue,sans-serif;font-size:28px">'+data.name.charAt(0).toUpperCase()+'</span>'};
+    img.onerror=function(){av.textContent=data.name.charAt(0).toUpperCase();};
     av.appendChild(img);
-  }else{av.innerHTML='<span style="font-family:Bebas Neue,sans-serif;font-size:28px">'+data.name.charAt(0).toUpperCase()+'</span>'}
-
+  }else av.textContent=data.name.charAt(0).toUpperCase();
   document.getElementById('channelName').textContent=data.name.toUpperCase();
-  document.getElementById('channelSub').textContent=(data.handle?data.handle+'  ·  ':'')+fmtNum(data.subs)+' subscribers  ·  '+fmtNum(data.videoCount)+' videos';
-
-  // Verified badge & compare button
-  const vb=document.getElementById('verifiedBadge');
-  vb.className='verified-badge'+(isOwnChannel?' show':'');
+  document.getElementById('channelSub').textContent=(data.handle?data.handle+' · ':'')+
+    fmtNum(data.subs)+' subscribers · '+fmtNum(data.videoCount)+' channel videos · Snapshot '+new Date(data.observedAt).toLocaleString();
+  document.getElementById('verifiedBadge').className='verified-badge'+(isOwnChannel?' show':'');
   document.getElementById('compareBtn').style.display=googleUser&&isOwnChannel?'block':'none';
-
-  // KPIs
-  const ec=parseFloat(data.engRate)>=3?'up':'down';
-  document.getElementById('kpiGrid').innerHTML=[
-    {label:'SUBSCRIBERS',value:fmtNum(data.subs),change:'Real-time from YouTube',cls:'up',accent:'--red'},
-    {label:'TOTAL VIEWS',value:fmtNum(data.views),change:'Lifetime channel views',cls:'up',accent:'--cyan'},
-    {label:'AVG ENGAGEMENT',value:data.engRate+'%',change:'Likes ÷ Views · last 50 videos',cls:ec,accent:'--green'},
-    {label:'UPLOAD FREQUENCY',value:data.uploadFreq,change:'Calculated from publish dates',cls:'up',accent:'--gold'},
-    {label:'NICHE CONFIDENCE',value:data.confidence+'%',change:'Category-based confidence',cls:'up',accent:'--cyan'},
-  ].map((k,i)=>`<div class="kpi-card" style="--accent-color:var(${k.accent});animation-delay:${i*0.08}s">
-    <div class="kpi-label">${k.label}</div><div class="kpi-value">${k.value}</div>
-    <div class="kpi-change ${k.cls}">${k.change}</div></div>`).join('');
-
-  // Niche
-  const n=NICHES[data.niche]||NICHES['Entertainment'];
-  document.getElementById('nicheIcon').textContent=n.icon;
-  document.getElementById('nicheName').textContent=data.niche.toUpperCase();
-  document.getElementById('nicheConf').textContent='✓ '+data.confidence+'% confidence · '+Math.min(50,data.rawVideos?.length||0)+' videos analyzed';
-  document.getElementById('confPct').textContent=data.confidence+'%';
-  setTimeout(()=>document.getElementById('confBar').style.width=data.confidence+'%',400);
-  document.getElementById('nicheTags').innerHTML=n.tags.map((t,i)=>`<span class="tag${i===0?' highlight':''}">${t}</span>`).join('');
-
-  // Plain-language content insights
-  document.getElementById('ruleList').innerHTML=(data.contentInsights||[]).map(function(r){
-    return `<div class="rule-item"><div class="rule-expr"><span class="bold">${esc(r.title)}</span><div style="margin-top:6px">${esc(r.summary)}</div></div>
-    <div class="rule-conf">${esc(r.impact||'')}</div><div class="rule-lift">${esc(r.support||'')}</div></div>`;
+  const measured=data.sampleMetrics.rateSampleCount;
+  const cards=[
+    {label:'PUBLIC SUBSCRIBERS',value:fmtNum(data.subs),detail:data.subs===null?'Count hidden or unavailable':'YouTube channel statistics',accent:'--red'},
+    {label:'LIFETIME CHANNEL VIEWS',value:fmtNum(data.views),detail:'YouTube channel statistics',accent:'--cyan'},
+    {label:'AVG LIKES / VIEWS',value:data.engRate===null?'—':data.engRate+'%',detail:measured+' of '+data.rawVideos.length+' sampled uploads',accent:'--green'},
+    {label:'RECENT PUBLIC UPLOADS',value:String(data.rawVideos.length),detail:'Up to 50 newest, not all channel uploads',accent:'--gold'},
+    {label:'MEAN UPLOAD INTERVAL',value:data.uploadFreq,detail:'Between sampled publish dates',accent:'--cyan'}
+  ];
+  document.getElementById('kpiGrid').innerHTML=cards.map(function(k){
+    return '<div class="kpi-card" style="--accent-color:var('+k.accent+')">'+
+      '<div class="kpi-label">'+esc(k.label)+'</div><div class="kpi-value">'+esc(k.value)+'</div>'+
+      '<div class="kpi-change">'+esc(k.detail)+'</div></div>';
   }).join('');
-
-  // Recommendations panel — ONLY for owner's own channel
+  document.getElementById('nicheIcon').textContent=CATEGORY_ICON[data.categoryId]||'📂';
+  document.getElementById('nicheName').textContent=data.niche.toUpperCase();
+  const categoryInfo=data.confidence===null?'Not available':data.confidence+'% of '+data.rawVideos.length+' recent uploads';
+  document.getElementById('nicheConf').textContent=categoryInfo;
+  document.getElementById('confPct').textContent=data.confidence===null?'—':data.confidence+'%';
+  document.getElementById('confBar').style.width=(data.confidence||0)+'%';
+  document.getElementById('nicheTags').innerHTML=data.sampleTags.length?data.sampleTags.map(function(t){
+    return '<span class="tag">'+esc(t)+'</span>';
+  }).join(''):'<span style="color:var(--text2);font-size:12px">No public tags in this sample.</span>';
+  document.getElementById('ruleList').innerHTML=(data.contentInsights||[]).map(function(r){
+    return '<div class="rule-item"><div class="rule-expr"><span class="bold">'+esc(r.title)+'</span>'+
+      '<div style="margin-top:6px">'+esc(r.summary)+'</div></div><div class="rule-conf">'+esc(r.impact)+
+      '</div><div class="rule-lift">'+esc(r.support)+'</div></div>';
+  }).join('');
   const rp=document.getElementById('recPanel');
   if(isOwnChannel){
-    rp.classList.add('show');
-    document.getElementById('recResults').innerHTML='';
+    rp.classList.add('show');document.getElementById('recResults').innerHTML='';
     runHealthAudit(data);
-  } else {
+  }else{
     rp.classList.remove('show');
     document.getElementById('healthPanel').classList.remove('show');
   }
-
-  // Performance table
-  document.getElementById('perfBody').innerHTML=data.recentVideos.map(v=>{
-    const er=v.views>0?((v.likes/v.views)*100).toFixed(2):'0.00';
-    const cls=er>5?'badge-green':er>2?'badge-gold':'badge-red';
-    return`<tr><td class="title-cell">${esc(v.title)}</td><td style="color:var(--text)">${fmtNum(v.views)}</td>
-      <td style="color:var(--text)">${fmtNum(v.likes)}</td><td style="color:var(--cyan)">${er}%</td>
-      <td><span class="badge ${cls}">${er>5?'VIRAL':er>2?'GOOD':'LOW'}</span></td></tr>`;}).join('');
-
+  document.getElementById('perfBody').innerHTML=data.recentVideos.length?data.recentVideos.map(function(v){
+    const ratio=v.views>0&&v.likes!==null?((v.likes/v.views)*100).toFixed(2)+'%':'—';
+    return '<tr><td class="title-cell">'+esc(v.title)+'</td>'+
+      '<td>'+fmtNum(v.views)+'</td><td>'+fmtNum(v.likes)+'</td>'+
+      '<td style="color:var(--cyan)">'+ratio+'</td>'+
+      '<td><a href="https://www.youtube.com/watch?v='+encodeURIComponent(v.id)+'" target="_blank" rel="noopener noreferrer" style="color:var(--cyan)">WATCH ↗</a></td></tr>';
+  }).join(''):'<tr><td colspan="5">No public uploads available for this channel.</td></tr>';
   Object.values(charts).forEach(c=>c.destroy());charts={};
   renderCharts(data);
   document.getElementById('chatFab').classList.add('visible');
