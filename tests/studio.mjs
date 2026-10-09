@@ -50,7 +50,7 @@ assert.deepEqual(validateExtracted({entries:[{newTitle:'Shabad',date:''}]}).map(
 assert.throws(()=>validateExtracted({entries:[]}),/No recognizable/);
 assert(html.includes('studio-input.js')&&html.includes('planMessage')&&html.includes('extractTextAI'),'Text-first entry UI missing');
 assert(html.includes('manualNew')&&html.includes('fileToggle'),'Manual entry and optional file upload must remain');
-const adapterRefs=[...inputCode.matchAll(/\\$\\('([A-Za-z0-9]+)'\\)/g)].map(m=>m[1]);
+const adapterRefs=[...inputCode.matchAll(/\$\('([A-Za-z0-9]+)'\)/g)].map(m=>m[1]);
 const refs=[...js.matchAll(/\$\('([A-Za-z0-9]+)'\)/g)].map(m=>m[1]).concat(adapterRefs);
 const ids=[...html.matchAll(/id="([^"]+)"/g)].map(m=>m[1]);
 const dynamicIds=new Set(['finalTitleInput']);
