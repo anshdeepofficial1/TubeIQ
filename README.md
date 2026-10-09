@@ -18,8 +18,8 @@ Open [Content Studio](https://ytengine.vercel.app/studio) or select **Content St
 
 **Workflow**
 1. Connect your real channel using a YouTube @handle, a channel URL, or its UC channel ID. A competitor can also be connected; both use official **public** YouTube channel and up-to-50-recent-upload responses.
-2. Import your existing **.xlsx, .xls or .csv** content calendar (5 MB max, 150 data rows max). Review and manually correct the detected **Date**, **Old Title**, **Your New Title**, and optional **Content Notes** column mapping. An Excel workbook's first sheet is used for import.
-3. The local spreadsheet checks identify missing/repeated titles, repeated upload dates and titles above YouTube's 100-character limit. Nothing is fabricated.
+2. **Share your content in any format:** paste a Markdown table, copy-and-paste rows from Excel (tabs), paste CSV, type a dated/bulleted list, or enter one title/content idea in the manual-entry form. You **do not need a spreadsheet**. An optional, collapsed section also supports **.xlsx, .xls or .csv** upload (up to 5 MB / 150 rows, first Excel sheet read).
+3. For natural-language messages rather than a table, choose **Understand with AI**: Gemini extracts the dates, old titles, revised titles or content ideas into editable rows. It must leave unknown values blank rather than inventing them. The creator confirms the column mapping/interpretation before use. Local checks identify duplicate wording, repeated upload dates and overlong titles.
 4. Click **Review all with AI**. Four existing calendar rows per request are reviewed by Gemini with the real channel's recent public title/metrics sample and optional public competitor sample. Suggestions are editorial: **keep**, **improve**, **verify** or **insufficient evidence**. Where specific public video IDs are cited, TubeIQ validates them against the actual data it supplied to AI.
 5. Open any entry to inspect the original date/title, your chosen new title, reasoning, and verified public video links. Keep your own title, accept a suggested alternate, or edit manually; **approval is always required**.
 6. Export a reviewed **Excel workbook**: for Excel imports, the app re-reads the original workbook bytes and appends a separately named **TubeIQ Review** worksheet, preserving the source worksheets as separate tabs on a best-effort basis. Keep the untouched original file to preserve any unsupported advanced formatting/macros/features. If the spreadsheet parser is unavailable, export falls back to formula-safe CSV.
@@ -27,7 +27,7 @@ Open [Content Studio](https://ytengine.vercel.app/studio) or select **Content St
 
 **Evidence rules:** Sampled public video view/like counts are current totals, not historical first-day performance. Competitor private CTR/retention and audience behavior are not available. AI cannot verify a Gurbani speaker, specific shabad or quotation from titles alone; audio or a verified transcript is required for such claims. No “viral score,” predicted views, guaranteed publishing hour, or invented growth gap.
 
-**AI data handling:** Only after pressing Review all, the selected old/revised titles, upload dates, optional notes and public channel sample data are submitted through `/api/gemini` to Gemini. The original file itself is parsed locally and is not sent to the AI endpoint. Review results may be inaccurate; the creator must approve every final title.
+**AI data handling:** When you explicitly choose **Understand with AI**, the pasted freeform message is submitted through `/api/gemini` so Gemini can extract structured rows (not yet rewrite titles). When you later press **Review all**, selected old/revised titles, upload dates, optional notes and public channel samples are submitted for editorial recommendations. The original file itself is parsed locally and is not sent to the AI endpoint. Review results may be inaccurate; the creator must approve every final title.
 
 **Requirements:** The same **`YOUTUBE_API_KEY`** and **`GEMINI_API_KEY`** server-side Vercel environment variables described below. No additional provider keys or cloud database are required for the current browser-session workflow. Full owner-only YouTube Studio CTR, retention, audience timing, persistent backend accounts and automated YouTube publishing are **not implemented**.
 
@@ -100,7 +100,8 @@ TubeIQ/
 ├── premium.css      # Shared premium visual design
 ├── studio.html      # Channel-aware Excel title review workspace
 ├── studio.css       # Studio responsive layout
-├── studio.js        # Excel processing, public channel research, AI reviews and export
+├── studio.js        # Spreadsheet processing, public channel research, AI review and export
+├── studio-input.js  # Pasted tables, plain-language AI extraction, manual entry
 ├── legal.css        # Matching Privacy and Terms design
 ├── api/
 │   ├── youtube.js   # Restricted, read-only YouTube gateway (server-side key)
