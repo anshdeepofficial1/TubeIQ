@@ -1250,125 +1250,72 @@ function extractJSONArray(text){
   throw new Error('AI response was not valid JSON.');
 }
 async function generateRecommendations(){
-  const topic   = document.getElementById('wizTopicInput').value.trim();
-  const format  = document.getElementById('wizFormat').value;
-  const audience= document.getElementById('wizAudience').value;
-  const keywords= document.getElementById('wizKeywords').value.trim();
-  if(!topic){document.getElementById('wizTopicInput').focus();showAlert('Please describe your content idea first!');return}
-  if(!channelContext){return}
-
-  const btn=document.getElementById('generateBtn');
-  btn.disabled=true;btn.textContent='GENERATING…';
-  document.getElementById('recResults').innerHTML='<div style="text-align:center;padding:32px;font-family:DM Mono,monospace;font-size:13px;color:var(--text2)"><div class="loader-ring" style="margin:0 auto 16px"></div>AI is analyzing your channel patterns…</div>';
-
-  // Channel context for prompt
-  const topPerformers=(channelContext.recentVideos||[]).slice(0,3).map(v=>`"${v.title}" (${fmtNum(v.views)} views, ${((v.likes/(v.views||1))*100).toFixed(2)}% eng)`).join('\n- ');
-  const topInsight=channelContext.contentInsights?.[0];
-  const channelSummary=`Channel: ${channelContext.name}
-Niche: ${channelContext.niche} (${channelContext.confidence}% confidence)
-Subscribers: ${fmtNum(channelContext.subs)} | Total Views: ${fmtNum(channelContext.views)}
-Avg Engagement Rate: ${channelContext.engRate}%
-Upload Frequency: ${channelContext.uploadFreq}
-Top Performing Pattern Insight: ${topInsight?topInsight.summary:'No strong pattern detected yet.'}
-Best Recent Videos:
-- ${topPerformers}`;
-
-  const prompt=`You are an expert YouTube SEO strategist and content advisor. 
-
-CHANNEL DATA:
-${channelSummary}
-
-USER'S PLANNED CONTENT:
-Topic/Idea: ${topic}
-Format: ${format}
-Target Audience: ${audience}
-Keywords to rank for: ${keywords||'not specified'}
-
-Generate exactly 3 video package options for this content idea. Each option must target different angles.
-
-Respond ONLY in valid JSON, no markdown, no explanation. Format:
-[
-  {
-    "option": 1,
-    "title": "Full YouTube title (60-70 chars, SEO optimized)",
-    "description": "First 3 lines of YouTube description (the part shown before 'Show more', ~150 chars). Include main keyword naturally.",
-    "fullDescription": "Complete YouTube description (300-400 words). Include hook, what viewers will learn, timestamps placeholder, call to action, relevant links placeholder, hashtags at end.",
-    "tags": ["tag1","tag2","tag3","tag4","tag5","tag6","tag7","tag8","tag9","tag10"],
-    "thumbnailText": "Short punchy text for thumbnail (max 5 words, ALL CAPS)",
-    "uploadDay": "Best day to upload (Mon/Tue/Wed/Thu/Fri/Sat/Sun)",
-    "uploadTime": "Best time in IST",
-    "estimatedViews": "Realistic range e.g. 10K-50K",
-    "whyItWorks": "1-sentence explanation based on channel patterns"
-  }
-]`;
-
+  const topic=document.getElementById('wizTopicInput').value.trim().slice(0,1200);
+  const format=document.getElementById('wizFormat').value;
+  const audience=document.getElementById('wizAudience').value;
+  const keywords=document.getElementById('wizKeywords').value.trim().slice(0,400);
+  if(!topic){showAlert('Describe your video idea first.');return;}
+  if(!channelContext||!isOwnChannel){showAlert('Connect and analyze your channel first.');return;}
+  const btn=document.getElementById('generateBtn'),target=document.getElementById('recResults');
+  btn.disabled=true;btn.textContent='GENERATING DRAFTS…';
+  target.textContent='Asking Gemini to draft editable ideas from available channel data…';
+  const d=channelContext;
+  const examples=d.recentVideos.slice(0,5).map(v=>({
+    title:v.title,views:v.views,likes:v.likes
+  }));
+  const summary=JSON.stringify({
+    channel:d.name,category:d.niche,categorySharePercent:d.confidence,
+    sampleSize:d.rawVideos.length,likesToViewsPercent:d.engRate,
+    uploadsIntervalDays:d.uploadFreq,measuredRecentVideos:examples
+  });
+  const instructions='You are a YouTube content editor. Propose creative drafts, not guaranteed performance results. '+
+    'The provided public sample is limited to recent uploads, NOT retention, CTR, historical audience behavior or the best hour to post. '+
+    'Do not estimate views, claim rankings, invent engagement benchmarks, or suggest precise best upload times. '+
+    'Refer to metrics only when explicitly included below. Avoid fake links, real timestamps or speculative success claims.';
+  const prompt=instructions+'\nPUBLIC CHANNEL DATA: '+summary+
+    '\nPLANNED VIDEO: '+JSON.stringify({topic:topic,format:format,audience:audience,keywords:keywords})+
+    '\nReturn ONLY a valid JSON array of exactly three distinct editorial draft options. '+
+    'For each item include: option (integer 1-3), title (string), description (short preview), '+
+    'fullDescription (useful draft, 100-180 words, no fabricated timestamps or external links), '+
+    'tags (array of real topic-related keyword suggestions, not ranked keywords), '+
+    'thumbnailText (max 5 words), whyItWorks (one sentence explaining the proposed creative angle, '+
+    'not a measured performance claim). Clearly write suggestions, not factual forecasts.';
   try{
-    const raw=await callGeminiAPI({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:2000}});
+    const raw=await callGeminiAPI({contents:[{role:'user',parts:[{text:prompt}]}],
+      generationConfig:{maxOutputTokens:3000}});
     const recs=extractJSONArray(raw);
+    if(!Array.isArray(recs)||recs.length!==3||recs.some(r=>!r||typeof r.title!=='string'))
+      throw new Error('AI returned incomplete drafts; please retry.');
     renderRecCards(recs);
-  }catch(e){
-    // Fallback: generate locally based on channel data
-    renderRecCards(buildFallbackRecs(topic,format,audience,keywords));
-  }
-  btn.disabled=false;btn.textContent='GENERATE FULL VIDEO PACKAGE →';
+  }catch(err){
+    target.innerHTML='<div class="rec-section-text">No generated drafts available. '+esc(err.message||'AI request failed')+
+      ' — Please check Gemini configuration and try again. No substitute content has been invented.</div>';
+  }finally{btn.disabled=false;btn.textContent='GENERATE FULL VIDEO PACKAGE →';}
 }
 
-function buildFallbackRecs(topic,format,audience,kw){
-  const ch=channelContext;const n=ch?.niche||'Content';
-  const kwList=kw?kw.split(',').map(k=>k.trim()).filter(Boolean):[];
-  const kwStr=kwList.length?kwList[0]:n.toLowerCase();
-  return[
-    {option:1,title:`I ${topic.slice(0,40)} (${format==='challenge'?'CHALLENGE':'Full Guide'})`,
-     description:`Everything you need to know about ${kwStr}. In this video, I'll take you step by step through the entire process.`,
-     fullDescription:`In this video, I cover everything about ${topic}.\n\n📌 What you'll learn:\n- Step 1\n- Step 2\n- Step 3\n\n⏱ Timestamps:\n0:00 - Intro\n2:00 - Main content\n\n🔔 Subscribe for more ${n} content!\n\n#${kwStr.replace(/\s/g,'')} #${n.replace(/\s/g,'')} #YouTube2025`,
-     tags:[kwStr,n,format,'tutorial','2025','beginners','guide','howto','tips','viral'],
-     thumbnailText:`${kwStr.toUpperCase()} GUIDE`,uploadDay:'Tuesday',uploadTime:'6:00 PM IST',
-     estimatedViews:'5K-25K',whyItWorks:`Matches your channel's best-performing ${format} pattern`},
-    {option:2,title:`Why ${topic.slice(0,35)} Changed Everything For Me`,
-     description:`My honest experience with ${kwStr}. This video might change how you think about it.`,
-     fullDescription:`Story time — here's what happened when I ${topic}.\n\nThis experience taught me a lot, and I'm sharing every detail.\n\n🔔 Subscribe for weekly ${n} videos!\n\n#${kwStr.replace(/\s/g,'')} #storytelling #authentic`,
-     tags:[kwStr,'story','personal','experience','2025',n,'authentic','honest','journey','growth'],
-     thumbnailText:'THE TRUTH ABOUT '+kwStr.toUpperCase().slice(0,8),uploadDay:'Thursday',uploadTime:'7:00 PM IST',
-     estimatedViews:'8K-40K',whyItWorks:'Personal story format drives 2x higher watch time on your channel'},
-    {option:3,title:`${topic.slice(0,30)} in 2025 — Honest Review`,
-     description:`Is ${kwStr} worth it in 2025? I tested it so you don't have to. Full breakdown inside.`,
-     fullDescription:`Complete review of ${topic} in 2025.\n\n✅ Pros:\n- \n\n❌ Cons:\n- \n\nFinal verdict: \n\n🔔 Subscribe for more honest reviews!\n\n#${kwStr.replace(/\s/g,'')} #review #honest #2025`,
-     tags:[kwStr,'review','2025','honest','comparison','worth it',n,'tested','results','breakdown'],
-     thumbnailText:'WORTH IT IN 2025?',uploadDay:'Saturday',uploadTime:'11:00 AM IST',
-     estimatedViews:'3K-15K',whyItWorks:'Review format has highest click-through rate in your niche'},
-  ];
-}
 
 function renderRecCards(recs){
-  if(!recs||!recs.length){document.getElementById('recResults').innerHTML='<p style="color:var(--muted);font-family:DM Mono,monospace;font-size:13px">Could not generate recommendations. Please try again.</p>';return}
-  document.getElementById('recResults').innerHTML=recs.map((r,i)=>`
-    <div class="rec-card" style="animation-delay:${i*0.1}s">
-      <div class="rec-card-head">
-        <div class="rec-card-num">0${r.option||i+1}</div>
-        <div class="rec-card-title">${esc(r.title)}</div>
-      </div>
-      <div class="rec-card-body">
-        <div class="rec-thumbnail-text">${esc(r.thumbnailText||'CLICK THIS')}</div>
-        <div style="margin-top:16px" class="rec-section">
-          <div class="rec-section-label">📝 Description Preview</div>
-          <div class="rec-section-text">${esc(r.description)}</div>
-        </div>
-        <details style="margin-bottom:12px">
-          <summary style="font-family:'DM Mono',monospace;font-size:11px;color:var(--cyan);cursor:pointer;letter-spacing:1px;padding:8px 0;list-style:none">▶ SHOW FULL DESCRIPTION</summary>
-          <div class="rec-section-text" style="margin-top:8px;white-space:pre-line;background:var(--bg3);padding:12px;border-radius:8px;font-size:12px">${esc(r.fullDescription||r.description)}</div>
-        </details>
-        <div class="rec-section">
-          <div class="rec-section-label">🏷 Tags</div>
-          <div class="rec-tags-wrap">${(r.tags||[]).map(t=>`<span class="rec-tag">${esc(t)}</span>`).join('')}</div>
-        </div>
-        <div class="rec-meta-row">
-          <div class="rec-meta-chip">📅 Upload: <strong>${esc(r.uploadDay)} ${esc(r.uploadTime||'')}</strong></div>
-          <div class="rec-meta-chip">👁 Est. Views: <strong>${esc(r.estimatedViews||'—')}</strong></div>
-          <div class="rec-meta-chip">💡 <strong>${esc(r.whyItWorks||'')}</strong></div>
-        </div>
-      </div>
-    </div>`).join('');
+  const target=document.getElementById('recResults');
+  if(!Array.isArray(recs)||!recs.length){target.textContent='No recommendations available.';return;}
+  target.innerHTML=recs.map(function(r,i){
+    const tags=Array.isArray(r.tags)?r.tags.filter(t=>typeof t==='string').slice(0,15):[];
+    return '<div class="rec-card">'+
+      '<div class="rec-card-head"><div class="rec-card-num">0'+(i+1)+'</div>'+
+      '<div class="rec-card-title">'+esc(r.title||'Untitled draft')+'</div></div>'+
+      '<div class="rec-card-body">'+
+      '<div class="rec-thumbnail-text">'+esc(r.thumbnailText||'')+'</div>'+
+      '<div class="rec-section" style="margin-top:16px"><div class="rec-section-label">DESCRIPTION PREVIEW · AI DRAFT</div>'+
+      '<div class="rec-section-text">'+esc(r.description||'')+'</div></div>'+
+      '<details style="margin-bottom:12px"><summary style="font-family:DM Mono,monospace;font-size:11px;color:var(--cyan);cursor:pointer;padding:8px 0">▶ SHOW DRAFT DESCRIPTION</summary>'+
+      '<div class="rec-section-text" style="white-space:pre-line">'+esc(r.fullDescription||r.description||'')+'</div></details>'+
+      '<div class="rec-section"><div class="rec-section-label">SUGGESTED TAGS · NOT SEARCH-RANK DATA</div>'+
+      '<div class="rec-tags-wrap">'+tags.map(t=>'<span class="rec-tag">'+esc(t)+'</span>').join('')+'</div></div>'+
+      '<div class="rec-meta-row"><div class="rec-meta-chip">💡 CREATIVE RATIONALE: <strong>'+
+      esc(r.whyItWorks||'Draft suggestion')+'</strong></div></div>'+
+      '</div></div>';
+  }).join('');
 }
+
 
 /* ════════════════════════════════
    AI CHATBOT
