@@ -46,10 +46,13 @@
     footer{text-align:center;padding:0 20px 30px;color:var(--muted);font-family:'DM Mono',monospace;font-size:11px}
     @media(max-width:560px){h1{font-size:38px}.card{padding:22px}}
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/premium.css">
+  <link rel="stylesheet" href="/legal.css">
 </head>
-<body>
+<body class="legal-page">
   <nav>
-    <a class="brand" href="index.html" aria-label="Back to TubeIQ home">
+    <a class="brand" href="/" aria-label="Back to TubeIQ home">
       <img src="Logo.png" alt="TubeIQ logo">
       <div class="brand-name">Tube<span>IQ</span></div>
     </a>
@@ -76,6 +79,10 @@
       <p>The current open-source application does not configure its own persistent analytics database. Its dashboard state and OAuth access token are held in browser memory while the page is open. Public API responses can be temporarily cached by the hosting infrastructure. Hosting and API providers may process request logs under their own policies.</p>
       <p>To revoke read-only YouTube authorization, remove TubeIQ's access in your Google Account's third-party connections and sign out from the app.</p>
 
+      <h2>Content Studio / Spreadsheet Uploads</h2>
+      <p>When you upload an Excel or CSV calendar, the file is parsed in your browser. TubeIQ does not automatically publish or alter any YouTube videos or your original source file. When you explicitly click <strong>Review all with AI</strong>, the selected title, date, optional content notes and sampled public YouTube channel information are transmitted through our server to Google's Gemini API for an editorial response.</p>
+      <p>Original Excel files are not uploaded by the Studio as files to TubeIQ servers. The optional <strong>Save on this device</strong> action stores a copy of the reviewed rows, titles and selected channel context in this browser's local storage, which can be cleared by the app's Clear local draft action or by clearing browser site data. An imported channel snapshot may be stored in temporary session storage when navigating between the dashboard and Content Studio. Avoid importing sensitive records on shared devices.</p>
+      <p>The exported workbook includes a separate review worksheet where supported; exporting may not preserve every advanced Excel feature or formatting rule. Keep your untouched original workbook as a backup.</p>
       <h2>Security</h2>
       <p>We apply reasonable safeguards to protect data processed by TubeIQ. No method of transmission or storage is 100% secure.</p>
 
