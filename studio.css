@@ -211,3 +211,57 @@
 .studio-competition-metric strong{font-size:13px;font-weight:800;color:#c5b6ff}
 .studio-competition-metric strong+strong{color:#80ddcf}
 .studio-competition>p{font-size:10px;line-height:1.7;color:#8392a9;margin-top:15px}
+
+
+/* Content Studio v2.1: text / chat first; optional spreadsheet is a discreet secondary action. */
+.studio-import-review[hidden]{display:none!important}
+.studio-compose-panel{border:1px solid rgba(175,154,250,.22);
+ background:radial-gradient(ellipse at 96% 0%,rgba(150,132,242,.12),transparent 43%),#141b2a;padding:28px}
+.studio-compose-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.studio-format-label{font-size:9px;font-weight:800;letter-spacing:1.6px;color:#83e0d2;padding:7px 10px;
+ background:rgba(131,224,210,.08);border:1px solid rgba(131,224,210,.19);border-radius:99px}
+.studio-compose-label{display:block;font-size:10px;letter-spacing:1.2px;font-weight:800;color:#afbdd2;margin-bottom:11px}
+.studio-message-input{display:block;width:100%;min-height:200px;resize:vertical;border:1px solid rgba(192,197,236,.19);
+ border-radius:15px;background:#0b1120;padding:22px 21px;color:#f1f0fa;font:500 13px/1.85 'DM Sans',sans-serif;
+ outline:none;transition:border-color .2s,box-shadow .2s}
+.studio-message-input:focus{border-color:#ac9af4;box-shadow:0 0 0 4px rgba(173,153,245,.075)}
+.studio-message-input::placeholder{color:#75849d;opacity:1}
+.studio-composer-actions{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:16px}
+.studio-composer-actions>span{max-width:390px;color:#94a2b8;font-size:11px;line-height:1.7}
+.studio-composer-actions>div{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}
+.studio-compose-caption{font-size:11px;line-height:1.7;color:#889ab0;margin-top:20px;padding-top:14px;
+ border-top:1px solid rgba(199,208,245,.08)}
+.studio-manual-toggle,.studio-file-toggle{border:1px solid rgba(201,216,248,.1);
+ background:#131a29;border-radius:14px;margin-top:13px;overflow:hidden}
+.studio-manual-toggle>summary,.studio-file-toggle>summary{display:flex;gap:12px;align-items:center;
+ padding:19px 22px;font-size:13px;font-weight:800;color:#dcdff1;cursor:pointer;list-style:none}
+.studio-manual-toggle>summary::-webkit-details-marker,.studio-file-toggle>summary::-webkit-details-marker{display:none}
+.studio-manual-toggle>summary>span,.studio-file-toggle>summary>span{display:inline-flex;width:31px;height:31px;
+ align-items:center;justify-content:center;font-size:18px;color:#b5a2fb;background:rgba(168,148,245,.1);border-radius:9px}
+.studio-manual-toggle>summary small,.studio-file-toggle>summary small{font-size:11px;font-weight:500;color:#8a97ae;margin-left:auto}
+.studio-manual-toggle[open]>summary,.studio-file-toggle[open]>summary{border-bottom:1px solid var(--border)}
+.studio-manual-form{padding:20px 24px 25px}
+.studio-manual-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.studio-manual-grid label{font-size:11px;font-weight:700;color:#c7ccdd;display:flex;flex-direction:column;gap:9px}
+.studio-manual-grid label span{color:#71819a;font-weight:500}
+.studio-manual-grid input{font:500 12px 'DM Sans',sans-serif;padding:13px 14px;background:#0d1320;color:#f1f0f9;
+ border:1px solid rgba(192,205,240,.16);border-radius:10px;min-width:0;outline:none}
+.studio-manual-grid input:focus{border-color:#a996ed}
+.studio-file-panel{border:0;background:none;box-shadow:none;padding:17px}
+.studio-file-panel .studio-dropzone{min-height:156px}
+.studio-file-panel .studio-upload-symbol{width:38px;height:38px;font-size:17px;margin-bottom:9px}
+.studio-file-panel .studio-dropzone h3{font-size:13px}
+.studio-file-panel .studio-dropzone p{font-size:11px;margin-bottom:11px}
+.studio-import-review{margin-top:15px}
+@media(max-width:760px){
+ .studio-compose-panel{padding:18px}.studio-compose-top{align-items:flex-start;gap:8px}
+ .studio-compose-panel .studio-panel-head{margin-bottom:17px}
+ .studio-message-input{padding:16px;min-height:215px}
+ .studio-composer-actions{flex-direction:column;align-items:stretch;gap:12px}
+ .studio-composer-actions>span{max-width:100%}
+ .studio-composer-actions>div{justify-content:stretch;display:grid;grid-template-columns:1fr 1fr}
+ .studio-composer-actions .studio-btn{white-space:normal}
+ .studio-manual-grid{grid-template-columns:1fr}
+ .studio-manual-toggle>summary,.studio-file-toggle>summary{flex-wrap:wrap;padding:16px}
+ .studio-manual-toggle>summary small,.studio-file-toggle>summary small{margin-left:43px;width:100%}
+}
