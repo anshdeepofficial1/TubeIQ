@@ -32,7 +32,13 @@ function parsePastedTable(text){
   if(dated.length && dated.every(Boolean))return [['Date','Your New Title'],...dated.map(m=>[m[1].trim(),m[2].trim()])];
   const bullets=lines.map(l=>l.match(/^\s*(?:[-*•]\s+|\d+[.)]\s+)(.+)$/u));
   if(bullets.length>=2&&bullets.every(Boolean))return [['Your New Title'],...bullets.map(m=>[m[1].trim()])];
-  if(lines.length===1&&lines[0].length<=200)return [['Your New Title'],[lines[0]]];
+  if(lines.length===1&&lines[0].length<=200){
+    // A long conversational request isn't the same thing as a finished video title.
+    const words=lines[0].split(/\s+/);
+    const conversational=/\b(?:i have|i want|i need|my video|please|can you|i'm planning|we are|could you|i've got|for next month|suggest a title|need a title)\b|(?:मेरे को|मुझे|मैंने|बनाना है|क्या करूँ|बता दो|ਮੈਨੂੰ|ਚਾਹੀਦਾ|ਬਣਾ ਦੇਣਾ)/iu;
+    if(words.length<=18 && !conversational.test(lines[0]) && !/[?!]/.test(lines[0]))
+      return [['Your New Title'],[lines[0]]];
+  }
   return null;
 }
 function stageTextMatrix(matrix,label){
