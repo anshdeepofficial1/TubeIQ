@@ -303,3 +303,8 @@ body.studio-body{background:var(--studio-canvas);color:var(--studio-ink);font-fa
  .studio-competition-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(prefers-reduced-motion:reduce){.studio-body *{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+
+/* Dynamic state: a populated review list is visible on all devices. */
+.studio-body:has(#reviewRows .studio-row-open) #reviewShell[hidden]{display:block!important}
+.studio-body:has(#reviewRows .studio-row-open) #studioMetrics[hidden]{display:grid!important}
+.studio-body:has(#reviewRows .studio-row-open) #reviewEmpty{display:none!important}
