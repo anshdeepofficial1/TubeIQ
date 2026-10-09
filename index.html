@@ -775,32 +775,22 @@ footer a:hover{text-decoration:underline}
 
 // ─── CONFIG ───────────────────────────────────────
 // 1. YouTube Data API key
-const API_KEY = 'AIzaSyCIOYmplbs1CltAdSyb9SrO3BoPNprRotQ';
-// 2. Google OAuth Client ID
+// Public OAuth client identifier; API secrets are stored only in Vercel environment variables.
 const G_CLIENT = '911047484261-34u4ads73ertbck2dp7pbb1vm4qhmqtn.apps.googleusercontent.com';
-// 3. Gemini API key for AI features (stored in split form)
-var _gk1='AIzaSyCIOYmplbs1CltA',_gk2='dSyb9SrO3BoPNprRotQ';
-function getGemKey(){return _gk1+_gk2}
+const YT = '/api/youtube';
+
+
 // ──────────────────────────────────────────────────
 
-const YT = 'https://www.googleapis.com/youtube/v3';
+// YouTube requests go through the restricted, read-only server endpoint.
 
-const NICHES = {
-  'Entertainment':        {icon:'🎬',tags:['Comedy','Vlogs','Challenges','Shorts','Reacts']},
-  'Science & Technology': {icon:'🔬',tags:['Tutorials','Reviews','DBMS','SQL','Power BI']},
-  'Gaming':               {icon:'🎮',tags:["Let's Play",'Reviews','Streams','Walkthroughs','News']},
-  'Education':            {icon:'📚',tags:['How-to','Explainers','Lectures','Concepts','Documentaries']},
-  'Music':                {icon:'🎵',tags:['Covers','Originals','Reactions','Reviews','Tutorials']},
-  'Finance & Business':   {icon:'💹',tags:['Investing','Side Hustles','Analysis','Crypto','News']},
-  'Health & Fitness':     {icon:'💪',tags:['Workouts','Nutrition','Mindset','Reviews','Challenges']},
-  'Travel & Lifestyle':   {icon:'✈️',tags:['Vlogs','Tours','Tips','Luxury','Budgets']},
+const CAT_LABEL = {
+  '1':'Film & Animation','2':'Autos & Vehicles','10':'Music','15':'Pets & Animals','17':'Sports',
+  '19':'Travel & Events','20':'Gaming','22':'People & Blogs','23':'Comedy','24':'Entertainment',
+  '25':'News & Politics','26':'Howto & Style','27':'Education','28':'Science & Technology','29':'Nonprofits & Activism'
 };
-const CAT_NICHE = {'1':'Entertainment','2':'Travel & Lifestyle','10':'Music','15':'Travel & Lifestyle',
-  '17':'Health & Fitness','19':'Travel & Lifestyle','20':'Gaming','22':'Entertainment','23':'Entertainment',
-  '24':'Entertainment','25':'Finance & Business','26':'Health & Fitness','27':'Education','28':'Science & Technology','29':'Education'};
-const CAT_LABEL = {'1':'Film & Animation','2':'Autos','10':'Music','15':'Pets & Animals','17':'Sports',
-  '19':'Travel','20':'Gaming','22':'Vlogs','23':'Comedy','24':'Entertainment','25':'News',
-  '26':'Howto & Style','27':'Education','28':'Science & Tech','29':'Nonprofits'};
+const CATEGORY_ICON = {'10':'🎵','17':'🏅','19':'✈️','20':'🎮','24':'🎬','27':'📚','28':'🔬'};
+
 
 // ── App State ──
 let charts = {};
@@ -826,9 +816,9 @@ function closeAlert() {
 }
 
 // ── Utils ──
-function fmtNum(n){n=parseInt(n)||0;if(n>=1e9)return(n/1e9).toFixed(1)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return n.toString()}
+function fmtNum(n){if(n===null||n===undefined||n==='')return '—';n=Number(n);if(!Number.isFinite(n))return '—';if(n>=1e9)return(n/1e9).toFixed(1)+'B';if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return n.toLocaleString('en-US')}
 function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v))}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function announceStatus(msg){const s=document.getElementById('srStatus');if(!s)return;s.textContent='';setTimeout(function(){s.textContent=msg;},20)}
 function getThemeVar(cssVarName,fallback){const v=getComputedStyle(document.documentElement).getPropertyValue(cssVarName).trim();return v||fallback}
 function getThemePalette(){
@@ -864,145 +854,194 @@ function initThemeMode(){
 /* ════════════════════════════════
    YOUTUBE API
    ════════════════════════════════ */
-async function ytFetch(ep,params){
-  const u=new URL(YT+'/'+ep);
-  Object.entries({...params,key:API_KEY}).forEach(([k,v])=>u.searchParams.set(k,v));
-  const r=await fetch(u.toString());const j=await r.json();
-  if(j.error)throw new Error(j.error.message);return j;
+async function ytFetch(resource, params){
+  const u = new URL(YT, location.origin);
+  u.searchParams.set('resource',resource);
+  Object.entries(params).forEach(function(entry){u.searchParams.set(entry[0],entry[1]);});
+  const r=await fetch(u.toString());
+  let j;try{j=await r.json();}catch{throw new Error('YouTube service returned an invalid response.');}
+  if(!r.ok||j.error)throw new Error(j.error?.message||'YouTube API request failed.');
+  return j;
 }
-
 async function resolveChannelId(raw){
-  const i=raw.trim();
-  if(/^UC[\w-]{22}$/.test(i))return i;
-  const handle=i.startsWith('@')?i:('@'+i);
-  if(handle.length>1){
-    const h=await ytFetch('channels',{part:'id',forHandle:handle});
-    if(h.items?.length)return h.items[0].id;
-    if(i.startsWith('@'))throw new Error('Handle "'+i+'" not found.');
+  let i=raw.trim();
+  if(/^https?:\/\//i.test(i)){
+    let u;try{u=new URL(i);}catch{throw new Error('Invalid YouTube channel link.');}
+    if(!/(^|\.)youtube\.com$/.test(u.hostname))throw new Error('Use a youtube.com channel URL.');
+    const parts=u.pathname.split('/').filter(Boolean);
+    if(parts[0]==='channel'&&parts[1])i=parts[1];
+    else if(parts[0]&&parts[0].startsWith('@'))i=parts[0];
+    else if(parts[0]==='user'&&parts[1])i=parts[1];
+    else throw new Error('Use a channel ID, @handle, or standard YouTube channel URL.');
   }
-  const j=await ytFetch('channels',{part:'id',forUsername:i});if(j.items?.length)return j.items[0].id;
-  throw new Error('Channel not found. Try a channel ID (UC…) or @handle.');
+  if(/^UC[A-Za-z0-9_-]{22}$/.test(i))return i;
+  if(i.startsWith('@')){
+    const h=await ytFetch('channels',{part:'id',forHandle:i});
+    if(h.items?.length)return h.items[0].id;
+    throw new Error('YouTube handle not found.');
+  }
+  const u=await ytFetch('channels',{part:'id',forUsername:i});
+  if(u.items?.length)return u.items[0].id;
+  const h=await ytFetch('channels',{part:'id',forHandle:'@'+i});
+  if(h.items?.length)return h.items[0].id;
+  throw new Error('Channel not found. Use its UC channel ID or @handle.');
 }
 async function fetchChannelInfo(id){
-  const j=await ytFetch('channels',{part:'snippet,statistics',id});
-  if(!j.items?.length)throw new Error('Channel not found.');return j.items[0];
+  const j=await ytFetch('channels',{part:'snippet,statistics,contentDetails',id:id});
+  if(!j.items?.length)throw new Error('This YouTube channel was not found.');
+  return j.items[0];
 }
-async function fetchVideoDetails(channelId,max){
-  const s=await ytFetch('search',{part:'id',channelId,type:'video',order:'date',maxResults:max||50});
-  const ids=(s.items||[]).map(i=>i.id.videoId).filter(Boolean);if(!ids.length)return[];
-  const v=await ytFetch('videos',{part:'snippet,statistics,contentDetails',id:ids.join(',')});return v.items||[];
+async function fetchVideoDetails(channel,max){
+  const uploads=channel.contentDetails?.relatedPlaylists?.uploads;
+  if(!uploads)throw new Error('YouTube did not expose this channel\'s uploads playlist.');
+  // playlistItems.list costs 1 quota unit; search.list costs 100 and can omit uploads.
+  const s=await ytFetch('playlistItems',{part:'contentDetails',playlistId:uploads,maxResults:String(Math.min(50,max||50))});
+  const ids=(s.items||[]).map(v=>v.contentDetails?.videoId).filter(Boolean);
+  if(!ids.length)return [];
+  const data=await ytFetch('videos',{part:'snippet,statistics,contentDetails',id:ids.join(',')});
+  const byId=new Map((data.items||[]).map(v=>[v.id,v]));
+  return ids.map(id=>byId.get(id)).filter(Boolean);
 }
+
 
 /* ════════════════════════════════
    ANALYTICS ENGINE
    ════════════════════════════════ */
+function numberOrNull(v){
+  if(v===undefined||v===null||v==='')return null;
+  const n=Number(v);return Number.isFinite(n)&&n>=0?n:null;
+}
 function detectNiche(videos){
-  const t={};videos.forEach(v=>{const c=(v.snippet?.categoryId)||'24';const n=CAT_NICHE[c]||'Entertainment';t[n]=(t[n]||0)+1});
-  const s=Object.entries(t).sort((a,b)=>b[1]-a[1]);
-  if(!s.length)return{niche:'Entertainment',confidence:60};
-  return{niche:s[0][0],confidence:clamp(Math.round((s[0][1]/videos.length)*100),52,98)};
+  const counts={};
+  videos.forEach(v=>{
+    const category=v.snippet?.categoryId;
+    if(category)counts[category]=(counts[category]||0)+1;
+  });
+  const ranking=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  if(!ranking.length)return{niche:'No category data',categoryId:'',confidence:null,sampleCount:0};
+  const [id,count]=ranking[0];
+  return{niche:CAT_LABEL[id]||'Category '+id,categoryId:id,
+    confidence:Math.round(100*count/videos.length),sampleCount:videos.length};
 }
 function buildContentMix(videos){
-  const t={};videos.forEach(v=>{const c=(v.snippet?.categoryId)||'24';const l=CAT_LABEL[c]||'Other';t[l]=(t[l]||0)+1});
-  const top=Object.entries(t).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const tot=top.reduce((s,p)=>s+p[1],0)||1;const m={};top.forEach(p=>m[p[0]]=Math.round(p[1]/tot*100));return m;
+  const count={};
+  videos.forEach(v=>{
+    const id=v.snippet?.categoryId;
+    if(!id)return;
+    const label=CAT_LABEL[id]||'Category '+id;
+    count[label]=(count[label]||0)+1;
+  });
+  const entries=Object.entries(count).sort((a,b)=>b[1]-a[1]);
+  const top=entries.slice(0,4),other=entries.slice(4).reduce((sum,p)=>sum+p[1],0);
+  const out=Object.fromEntries(top);
+  if(other)out['Other categories']=other;
+  return out;
 }
 function calcUploadFreq(videos){
-  if(videos.length<2)return'—';
-  const d=videos.map(v=>new Date(v.snippet.publishedAt)).sort((a,b)=>b-a);
-  const g=[];for(let i=0;i<Math.min(d.length-1,20);i++)g.push((d[i]-d[i+1])/86400000);
-  const avg=g.reduce((s,x)=>s+x,0)/g.length;
-  if(avg<=1)return'1+/day';if(avg<=3.5)return Math.round(7/avg)+'/week';if(avg<=14)return Math.round(30/avg)+'/month';
-  return'Every '+Math.round(avg)+'d';
+  const dates=videos.map(v=>Date.parse(v.snippet?.publishedAt)).filter(Number.isFinite).sort((a,b)=>b-a);
+  if(dates.length<2)return '—';
+  const gaps=[];
+  for(let i=0;i<dates.length-1;i++)gaps.push((dates[i]-dates[i+1])/86400000);
+  const mean=gaps.reduce((a,b)=>a+b,0)/gaps.length;
+  if(mean<1)return 'More than daily';
+  return Math.round(mean*10)/10+' days';
 }
 function calcAvgEngagement(videos){
-  const r=videos.map(v=>{const vi=parseInt(v.statistics?.viewCount||0);const li=parseInt(v.statistics?.likeCount||0);return vi>0?(li/vi)*100:null}).filter(x=>x!==null);
-  if(!r.length)return 0;return r.reduce((s,x)=>s+x,0)/r.length;
+  const rates=videos.map(v=>{
+    const views=numberOrNull(v.statistics?.viewCount),likes=numberOrNull(v.statistics?.likeCount);
+    return views>0&&likes!==null?likes/views*100:null;
+  }).filter(v=>v!==null);
+  return rates.length?rates.reduce((a,b)=>a+b,0)/rates.length:null;
 }
-function buildRadarScores(videos,cs){
-  const er=calcAvgEngagement(videos);const eng=clamp(Math.round((er/5)*100),5,100);
-  const d=videos.map(v=>new Date(v.snippet.publishedAt)).sort((a,b)=>b-a);
-  const g=[];for(let i=0;i<Math.min(d.length-1,15);i++)g.push((d[i]-d[i+1])/86400000);
-  const ag=g.reduce((s,x)=>s+x,0)/(g.length||1);
-  const std=Math.sqrt(g.reduce((s,x)=>s+Math.pow(x-ag,2),0)/(g.length||1));
-  const con=clamp(Math.round(100-(ag>0?std/ag:1)*45),10,100);
-  const at=videos.reduce((s,v)=>s+((v.snippet?.tags?.length)||0),0)/(videos.length||1);
-  const seo=clamp(Math.round((at/15)*100),0,100);
-  const ac=videos.reduce((s,v)=>{const vi=parseInt(v.statistics?.viewCount||0);const co=parseInt(v.statistics?.commentCount||0);return s+(vi>0?(co/vi)*100:0)},0)/(videos.length||1);
-  const thumb=clamp(Math.round((ac/0.5)*100),5,100);
-  const subs=parseInt(cs?.subscriberCount||1);
-  const av=videos.reduce((s,v)=>s+parseInt(v.statistics?.viewCount||0),0)/(videos.length||1);
-  const ret=clamp(Math.round((av/subs)*100),5,100);
-  const tv=parseInt(cs?.viewCount||1);const grow=clamp(Math.round((subs/(tv/1000))*8),5,100);
-  return[eng,con,seo,thumb,ret,grow];
+function buildSampleMetrics(videos){
+  const mean=function(key){
+    const nums=videos.map(v=>numberOrNull(v.statistics?.[key])).filter(v=>v!==null);
+    return nums.length?Math.round(nums.reduce((a,b)=>a+b,0)/nums.length):null;
+  };
+  return{avgViews:mean('viewCount'),avgLikes:mean('likeCount'),avgComments:mean('commentCount'),
+    rateSampleCount:videos.filter(v=>numberOrNull(v.statistics?.viewCount)>0&&numberOrNull(v.statistics?.likeCount)!==null).length};
 }
 function buildMonthlyChart(videos){
-  const M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const now=new Date(),bk={};
-  for(let i=11;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);bk[d.getFullYear()+'-'+d.getMonth()]={views:0,likes:0,videos:0}}
-  videos.forEach(v=>{const d=new Date(v.snippet.publishedAt);const k=d.getFullYear()+'-'+d.getMonth();
-    if(bk[k]){bk[k].views+=parseInt(v.statistics?.viewCount||0);bk[k].likes+=parseInt(v.statistics?.likeCount||0);bk[k].videos++}});
-  const keys=Object.keys(bk);
-  return{
-    labels:keys.map(k=>M[parseInt(k.split('-')[1])]),
-    viewsData:keys.map(k=>bk[k].views),
-    likesData:keys.map(k=>bk[k].likes),
-    videosData:keys.map(k=>bk[k].videos),
-    engagementData:keys.map(k=>bk[k].views>0?Number(((bk[k].likes/bk[k].views)*100).toFixed(2)):0),
-  };
+  const monthNames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const now=new Date(),buckets={};
+  for(let i=11;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    buckets[d.getFullYear()+'-'+d.getMonth()]={views:0,likes:0,likesKnown:0,videos:0,rates:[]};
+  }
+  videos.forEach(v=>{
+    const d=new Date(v.snippet?.publishedAt);
+    if(!Number.isFinite(d.getTime()))return;
+    const key=d.getFullYear()+'-'+d.getMonth(),b=buckets[key];if(!b)return;
+    b.videos++;
+    const views=numberOrNull(v.statistics?.viewCount),likes=numberOrNull(v.statistics?.likeCount);
+    if(views!==null)b.views+=views;
+    if(likes!==null){b.likes+=likes;b.likesKnown++;}
+    if(views>0&&likes!==null)b.rates.push(likes/views*100);
+  });
+  const keys=Object.keys(buckets);
+  return{labels:keys.map(k=>{const [y,m]=k.split('-').map(Number);return monthNames[m]+' '+y;}),
+    viewsData:keys.map(k=>buckets[k].views),
+    likesData:keys.map(k=>buckets[k].likesKnown===buckets[k].videos?buckets[k].likes:null),
+    videosData:keys.map(k=>buckets[k].videos),
+    engagementData:keys.map(k=>{const r=buckets[k].rates;return r.length?Number((r.reduce((a,b)=>a+b,0)/r.length).toFixed(2)):null;})};
 }
 function buildContentInsights(videos){
-  const avg=calcAvgEngagement(videos)||0;
-  const P=[
-    {l:'Titles with numbers',f:v=>/\d+/.test(v.snippet?.title||'')},
-    {l:'Question-style titles',f:v=>(v.snippet?.title||'').includes('?')},
-    {l:'Short titles (<50 chars)',f:v=>(v.snippet?.title||'').length>0&&(v.snippet?.title||'').length<50},
-    {l:'Rich tags (10+)',f:v=>((v.snippet?.tags?.length)||0)>=10},
-    {l:'Long descriptions (400+ chars)',f:v=>((v.snippet?.description?.length)||0)>=400},
-    {l:'Emoji in title',f:v=>{try{return/\p{Emoji}/u.test(v.snippet?.title||'')}catch{return false}}},
+  const eligible=videos.filter(v=>numberOrNull(v.statistics?.viewCount)>0&&numberOrNull(v.statistics?.likeCount)!==null);
+  const properties=[
+    {label:'Titles containing numbers',test:v=>/\d/.test(v.snippet?.title||'')},
+    {label:'Question-style titles',test:v=>(v.snippet?.title||'').includes('?')},
+    {label:'Titles under 50 characters',test:v=>(v.snippet?.title||'').length>0&&(v.snippet.title.length<50)},
+    {label:'10 or more public tags',test:v=>(v.snippet?.tags?.length||0)>=10},
+    {label:'Descriptions of 400+ characters',test:v=>(v.snippet?.description?.length||0)>=400},
   ];
-  const insights=P.map(function(p){
-    const group=videos.filter(v=>p.f(v));
-    const other=videos.filter(v=>!p.f(v));
+  const insights=properties.map(p=>{
+    const group=eligible.filter(p.test),other=eligible.filter(v=>!p.test(v));
     if(group.length<3||other.length<3)return null;
-    const ge=calcAvgEngagement(group),oe=calcAvgEngagement(other);
-    const delta=parseFloat((ge-oe).toFixed(2));
-    const dir=delta>=0?'higher':'lower';
-    const support=Math.round((group.length/Math.max(videos.length,1))*100);
-    return{
-      title:p.l,
-      summary:p.l+' videos show '+Math.abs(delta).toFixed(2)+'% '+dir+' engagement than other uploads.',
-      impact:(delta>=0?'+':'')+delta.toFixed(2)+'% vs baseline',
-      support:support+'% of recent uploads'
-    };
-  }).filter(Boolean).sort(function(a,b){return parseFloat(b.impact)-parseFloat(a.impact)}).slice(0,6);
+    const a=calcAvgEngagement(group),b=calcAvgEngagement(other),delta=a-b;
+    return{title:p.label,
+      summary:'Within this '+eligible.length+'-video measurable sample, '+group.length+' matching uploads averaged '+a.toFixed(2)+'% likes/views vs '+b.toFixed(2)+'% for '+other.length+' others. Association, not causation.',
+      impact:(delta>0?'+':'')+delta.toFixed(2)+' percentage points',
+      support:group.length+' of '+eligible.length+' measurable videos'};
+  }).filter(Boolean).sort((a,b)=>Math.abs(parseFloat(b.impact))-Math.abs(parseFloat(a.impact)));
   if(insights.length)return insights;
-  return[
-    {title:'Recent engagement baseline',summary:'Average engagement across recent uploads is '+avg.toFixed(2)+'%.',impact:avg.toFixed(2)+'% avg',support:(videos.length||0)+' videos analyzed'},
-    {title:'Posting consistency',summary:'Upload frequency is calculated from real publish dates to avoid synthetic estimates.',impact:'Real schedule data',support:(videos.length||0)+' videos analyzed'},
-  ];
+  const avg=calcAvgEngagement(eligible);
+  return[{title:'Sample data coverage',
+    summary:avg===null?'No recent videos provide both public likes and views. A comparison cannot be calculated.':'Only '+eligible.length+' recent videos had usable like/view data. More observations are needed for pattern comparisons.',
+    impact:avg===null?'Unavailable':avg.toFixed(2)+'% sample average',
+    support:eligible.length+' of '+videos.length+' public uploads'}];
 }
+function getCommonTags(videos){
+  const counts=new Map();
+  videos.forEach(v=>(v.snippet?.tags||[]).forEach(t=>{if(typeof t==='string'&&t.trim())counts.set(t,(counts.get(t)||0)+1);}));
+  return [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5).map(e=>e[0]);
+}
+
 
 /* ════════════════════════════════
    MAIN DATA BUILDER
    ════════════════════════════════ */
 async function buildRealChannelData(channelId){
-  const[chanItem,videos]=await Promise.all([fetchChannelInfo(channelId),fetchVideoDetails(channelId,50)]);
-  const cs=chanItem.statistics,sn=chanItem.snippet;
+  const chanItem=await fetchChannelInfo(channelId);
+  const videos=await fetchVideoDetails(chanItem,50);
+  const cs=chanItem.statistics||{},sn=chanItem.snippet||{};
+  const category=detectNiche(videos),stats=buildSampleMetrics(videos),avgRate=calcAvgEngagement(videos);
   return{
-    channelId,
-    name:sn.title,handle:sn.customUrl||'',
+    channelId:channelId,name:sn.title||'Untitled channel',handle:sn.customUrl||'',
     thumbnailUrl:sn.thumbnails?.high?.url||sn.thumbnails?.medium?.url||sn.thumbnails?.default?.url||'',
-    niche:detectNiche(videos).niche,confidence:detectNiche(videos).confidence,
-    subs:parseInt(cs.subscriberCount||0),views:parseInt(cs.viewCount||0),videoCount:parseInt(cs.videoCount||0),
-    uploadFreq:calcUploadFreq(videos),engRate:calcAvgEngagement(videos).toFixed(2),
-    radarScores:buildRadarScores(videos,cs),
-    ...buildMonthlyChart(videos),
-    contentMix:buildContentMix(videos),contentInsights:buildContentInsights(videos),
-    recentVideos:videos.slice(0,8).map(v=>({title:v.snippet.title,views:parseInt(v.statistics?.viewCount||0),likes:parseInt(v.statistics?.likeCount||0)})),
-    rawVideos:videos,
+    niche:category.niche,categoryId:category.categoryId,confidence:category.confidence,
+    subs:cs.hiddenSubscriberCount?null:numberOrNull(cs.subscriberCount),
+    views:numberOrNull(cs.viewCount),videoCount:numberOrNull(cs.videoCount),
+    uploadFreq:calcUploadFreq(videos),engRate:avgRate===null?null:avgRate.toFixed(2),
+    sampleMetrics:stats,sampleTags:getCommonTags(videos),
+    ...buildMonthlyChart(videos),contentMix:buildContentMix(videos),contentInsights:buildContentInsights(videos),
+    recentVideos:videos.slice(0,8).map(v=>({
+      id:v.id,title:v.snippet?.title||'Untitled video',
+      views:numberOrNull(v.statistics?.viewCount),likes:numberOrNull(v.statistics?.likeCount)
+    })),
+    rawVideos:videos,observedAt:new Date().toISOString()
   };
 }
+
 
 /* ════════════════════════════════
    UI FLOW
@@ -1011,26 +1050,23 @@ function demoLoad(id){document.getElementById('channelInput').value=id;startAnal
 
 async function startAnalysis(){
   const input=document.getElementById('channelInput').value.trim();
-  if(!input){document.getElementById('channelInput').focus();return}
+  if(!input){document.getElementById('channelInput').focus();return;}
   showLoading();
   try{
     const channelId=await resolveChannelId(input);
-    const[data]=await Promise.all([buildRealChannelData(channelId),new Promise(res=>runLoadingSteps(res))]);
+    document.getElementById('s1').className='step-item done';
+    const data=await buildRealChannelData(channelId);
+    ['s2','s3','s4','s5'].forEach(id=>document.getElementById(id).className='step-item done');
     channelContext=data;chatHistory=[];
-    // Determine if this is the owner's own channel
-    isOwnChannel = !!(googleUser && ownerChannelId && ownerChannelId===channelId);
+    isOwnChannel=!!(googleAccessToken&&ownerChannelId===channelId);
     hideLoading();renderDashboard(data);
   }catch(err){
     hideLoading();document.getElementById('hero').style.display='flex';
-    showAlert(err.message);
+    showAlert(err.message||'Could not analyze this channel.');
   }
 }
 
-function runLoadingSteps(cb){
-  const s=['s1','s2','s3','s4','s5'],d=[0,650,1300,2000,2700];
-  s.forEach((id,i)=>setTimeout(()=>{if(i>0)document.getElementById(s[i-1]).className='step-item done';document.getElementById(id).className='step-item active'},d[i]));
-  setTimeout(()=>{document.getElementById('s5').className='step-item done';cb()},3300);
-}
+
 function showLoading(){
   document.getElementById('hero').style.display='none';
   document.getElementById('dashboard').style.display='none';
