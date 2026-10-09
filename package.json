@@ -1,0 +1,13 @@
+{
+  "name": "tubeiq",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Public YouTube API analytics and optional Gemini editorial drafts",
+  "scripts": {
+    "test": "node tests/validate.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
