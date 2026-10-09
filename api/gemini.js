@@ -1,8 +1,10 @@
+import { allowRequest } from '../lib/rate-limit.js';
 // Gemini is called from the server: API credentials never reach the browser.
 function fail(res,status,message){ return res.status(status).json({error:{message}}); }
 export default async function handler(req,res) {
   if (req.method!=='POST') {res.setHeader('Allow','POST');return fail(res,405,'Method not allowed');}
   res.setHeader('Cache-Control','no-store');
+  if (!allowRequest(req, 12)) {res.setHeader('Retry-After','60');return fail(res,429,'Too many requests. Retry shortly.');}
   if (!process.env.GEMINI_API_KEY) return fail(res,503,'AI is not configured. Set GEMINI_API_KEY in Vercel.');
   const origin=req.headers.origin;
   if (origin) {
